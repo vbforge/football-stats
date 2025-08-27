@@ -1,0 +1,435 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Football Statistics App</title>-->
+<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">-->
+<!--</head>-->
+<!--<body>-->
+<!--    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">-->
+<!--        <div class="container">-->
+<!--            <a class="navbar-brand" href="/">-->
+<!--                <i class="fas fa-futbol me-2"></i>Football Stats-->
+<!--            </a>-->
+<!--            <div class="navbar-nav ms-auto">-->
+<!--                <a class="nav-link" href="/">Add Action</a>-->
+<!--                <a class="nav-link" href="/statistics">Statistics</a>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </nav>-->
+
+<!--    <div class="container mt-4">-->
+<!--        &lt;!&ndash; Alert Messages &ndash;&gt;-->
+<!--        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">-->
+<!--            <i class="fas fa-check-circle me-2"></i>-->
+<!--            <span th:text="${success}"></span>-->
+<!--            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
+<!--        </div>-->
+<!--        -->
+<!--        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">-->
+<!--            <i class="fas fa-exclamation-circle me-2"></i>-->
+<!--            <span th:text="${error}"></span>-->
+<!--            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
+<!--        </div>-->
+
+<!--        <div class="row">-->
+<!--            &lt;!&ndash; Add Action Form &ndash;&gt;-->
+<!--            <div class="col-md-6">-->
+<!--                <div class="card">-->
+<!--                    <div class="card-header bg-success text-white">-->
+<!--                        <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Add Player Action</h5>-->
+<!--                    </div>-->
+<!--                    <div class="card-body">-->
+<!--                        <form th:action="@{/add-action}" th:object="${actionForm}" method="post">-->
+<!--                            <div class="mb-3">-->
+<!--                                <label class="form-label">Match Day Number:</label>-->
+<!--                                <input type="number" class="form-control" th:field="*{matchDayNumber}" -->
+<!--                                       min="1" required>-->
+<!--                            </div>-->
+
+<!--                            <div class="mb-3">-->
+<!--                                <div class="form-check">-->
+<!--                                    <input class="form-check-input" type="checkbox" -->
+<!--                                           id="newPlayerCheck" th:field="*{newPlayer}">-->
+<!--                                    <label class="form-check-label" for="newPlayerCheck">-->
+<!--                                        Add New Player-->
+<!--                                    </label>-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+<!--                            &lt;!&ndash; Existing Player Selection &ndash;&gt;-->
+<!--                            <div id="existingPlayerSection">-->
+<!--                                <div class="mb-3">-->
+<!--                                    <label class="form-label">Select Club:</label>-->
+<!--                                    <select class="form-select" id="clubSelect">-->
+<!--                                        <option value="">Choose club...</option>-->
+<!--                                        <option th:each="club : ${clubs}" -->
+<!--                                                th:value="${club.id}" -->
+<!--                                                th:text="${club.name}"></option>-->
+<!--                                    </select>-->
+<!--                                </div>-->
+<!--                                -->
+<!--                                <div class="mb-3">-->
+<!--                                    <label class="form-label">Select Player:</label>-->
+<!--                                    <select class="form-select" th:field="*{playerId}" id="playerSelect">-->
+<!--                                        <option value="">Choose player...</option>-->
+<!--                                    </select>-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+<!--                            &lt;!&ndash; New Player Section &ndash;&gt;-->
+<!--                            <div id="newPlayerSection" style="display: none;">-->
+<!--                                <div class="mb-3">-->
+<!--                                    <label class="form-label">Player Name:</label>-->
+<!--                                    <input type="text" class="form-control" th:field="*{playerName}">-->
+<!--                                </div>-->
+<!--                                -->
+<!--                                <div class="mb-3">-->
+<!--                                    <label class="form-label">Club Name:</label>-->
+<!--                                    <input type="text" class="form-control" th:field="*{clubName}">-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+<!--                            <div class="row">-->
+<!--                                <div class="col-6">-->
+<!--                                    <div class="mb-3">-->
+<!--                                        <label class="form-label">Goals:</label>-->
+<!--                                        <input type="number" class="form-control" th:field="*{goals}" -->
+<!--                                               min="0" value="0">-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                                <div class="col-6">-->
+<!--                                    <div class="mb-3">-->
+<!--                                        <label class="form-label">Assists:</label>-->
+<!--                                        <input type="number" class="form-control" th:field="*{assists}" -->
+<!--                                               min="0" value="0">-->
+<!--                                    </div>-->
+<!--                                </div>-->
+<!--                            </div>-->
+
+<!--                            <button type="submit" class="btn btn-success w-100">-->
+<!--                                <i class="fas fa-save me-2"></i>Add Action-->
+<!--                            </button>-->
+<!--                        </form>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Quick Stats &ndash;&gt;-->
+<!--            <div class="col-md-6">-->
+<!--                <div class="card">-->
+<!--                    <div class="card-header bg-info text-white">-->
+<!--                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Quick Actions</h5>-->
+<!--                    </div>-->
+<!--                    <div class="card-body">-->
+<!--                        <div class="d-grid gap-2">-->
+<!--                            <a href="/statistics" class="btn btn-outline-primary">-->
+<!--                                <i class="fas fa-trophy me-2"></i>View All Statistics-->
+<!--                            </a>-->
+<!--                            <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#clubStatsModal">-->
+<!--                                <i class="fas fa-users me-2"></i>Club Statistics-->
+<!--                            </button>-->
+<!--                        </div>-->
+<!--                        -->
+<!--                        <hr>-->
+<!--                        -->
+<!--                        <h6>Recent Actions</h6>-->
+<!--                        <div class="text-muted">-->
+<!--                            <small>Use the form to add goals and assists for players. -->
+<!--                            You can add new players or select existing ones.</small>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Club Stats Modal &ndash;&gt;-->
+<!--    <div class="modal fade" id="clubStatsModal" tabindex="-1">-->
+<!--        <div class="modal-dialog">-->
+<!--            <div class="modal-content">-->
+<!--                <div class="modal-header">-->
+<!--                    <h5 class="modal-title">Club Statistics</h5>-->
+<!--                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>-->
+<!--                </div>-->
+<!--                <div class="modal-body">-->
+<!--                    <div class="list-group">-->
+<!--                        <a th:each="club : ${clubs}" -->
+<!--                           th:href="@{/statistics/club/{id}(id=${club.id})}" -->
+<!--                           class="list-group-item list-group-item-action">-->
+<!--                            <i class="fas fa-shield-alt me-2"></i>-->
+<!--                            <span th:text="${club.name}"></span>-->
+<!--                        </a>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
+<!--    <script>-->
+<!--        // Toggle between new player and existing player sections-->
+<!--        document.getElementById('newPlayerCheck').addEventListener('change', function() {-->
+<!--            const existingSection = document.getElementById('existingPlayerSection');-->
+<!--            const newSection = document.getElementById('newPlayerSection');-->
+<!--            -->
+<!--            if (this.checked) {-->
+<!--                existingSection.style.display = 'none';-->
+<!--                newSection.style.display = 'block';-->
+<!--                // Clear existing player selection-->
+<!--                document.getElementById('playerSelect').value = '';-->
+<!--            } else {-->
+<!--                existingSection.style.display = 'block';-->
+<!--                newSection.style.display = 'none';-->
+<!--                // Clear new player fields-->
+<!--                document.querySelector('input[name="playerName"]').value = '';-->
+<!--                document.querySelector('input[name="clubName"]').value = '';-->
+<!--            }-->
+<!--        });-->
+
+<!--        // Load players when club is selected-->
+<!--        document.getElementById('clubSelect').addEventListener('change', function() {-->
+<!--            const clubId = this.value;-->
+<!--            const playerSelect = document.getElementById('playerSelect');-->
+<!--            -->
+<!--            // Clear previous options-->
+<!--            playerSelect.innerHTML = '<option value="">Choose player...</option>';-->
+<!--            -->
+<!--            if (clubId) {-->
+<!--                fetch(`/api/players/club/${clubId}`)-->
+<!--                    .then(response => response.json())-->
+<!--                    .then(players => {-->
+<!--                        players.forEach(player => {-->
+<!--                            const option = document.createElement('option');-->
+<!--                            option.value = player.id;-->
+<!--                            option.textContent = player.name;-->
+<!--                            playerSelect.appendChild(option);-->
+<!--                        });-->
+<!--                    })-->
+<!--                    .catch(error => console.error('Error loading players:', error));-->
+<!--            }-->
+<!--        });-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Statistics App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-futbol me-2"></i>Football Stats
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/">Add Action</a>
+            <a class="nav-link" href="/statistics">Statistics</a>
+            <a class="nav-link" href="/match-result">Match Results</a>
+            <a class="nav-link" href="/league">League Table</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row">
+        <!-- Add Action Form -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Add Player Action</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/add-action}" th:object="${actionForm}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Match Day Number:</label>
+                            <input type="number" class="form-control" th:field="*{matchDayNumber}"
+                                   min="1" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox"
+                                       id="newPlayerCheck" th:field="*{newPlayer}">
+                                <label class="form-check-label" for="newPlayerCheck">
+                                    Add New Player
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Existing Player Selection -->
+                        <div id="existingPlayerSection">
+                            <div class="mb-3">
+                                <label class="form-label">Select Club:</label>
+                                <select class="form-select" id="clubSelect">
+                                    <option value="">Choose club...</option>
+                                    <option th:each="club : ${clubs}"
+                                            th:value="${club.id}"
+                                            th:text="${club.name}"></option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Select Player:</label>
+                                <select class="form-select" th:field="*{playerId}" id="playerSelect">
+                                    <option value="">Choose player...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- New Player Section -->
+                        <div id="newPlayerSection" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label">Player Name:</label>
+                                <input type="text" class="form-control" th:field="*{playerName}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Club Name:</label>
+                                <input type="text" class="form-control" th:field="*{clubName}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Goals:</label>
+                                    <input type="number" class="form-control" th:field="*{goals}"
+                                           min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Assists:</label>
+                                    <input type="number" class="form-control" th:field="*{assists}"
+                                           min="0" value="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-save me-2"></i>Add Action
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/statistics" class="btn btn-outline-primary">
+                            <i class="fas fa-trophy me-2"></i>View All Statistics
+                        </a>
+                        <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#clubStatsModal">
+                            <i class="fas fa-users me-2"></i>Club Statistics
+                        </button>
+                    </div>
+
+                    <hr>
+
+                    <h6>Recent Actions</h6>
+                    <div class="text-muted">
+                        <small>Use the form to add goals and assists for players.
+                            You can add new players or select existing ones.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Club Stats Modal -->
+<div class="modal fade" id="clubStatsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Club Statistics</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group">
+                    <a th:each="club : ${clubs}"
+                       th:href="@{/statistics/club/{id}(id=${club.id})}"
+                       class="list-group-item list-group-item-action">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        <span th:text="${club.name}"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Toggle between new player and existing player sections
+    document.getElementById('newPlayerCheck').addEventListener('change', function() {
+        const existingSection = document.getElementById('existingPlayerSection');
+        const newSection = document.getElementById('newPlayerSection');
+
+        if (this.checked) {
+            existingSection.style.display = 'none';
+            newSection.style.display = 'block';
+            // Clear existing player selection
+            document.getElementById('playerSelect').value = '';
+        } else {
+            existingSection.style.display = 'block';
+            newSection.style.display = 'none';
+            // Clear new player fields
+            document.querySelector('input[name="playerName"]').value = '';
+            document.querySelector('input[name="clubName"]').value = '';
+        }
+    });
+
+    // Load players when club is selected
+    document.getElementById('clubSelect').addEventListener('change', function() {
+        const clubId = this.value;
+        const playerSelect = document.getElementById('playerSelect');
+
+        // Clear previous options
+        playerSelect.innerHTML = '<option value="">Choose player...</option>';
+
+        if (clubId) {
+            fetch(`/api/players/club/${clubId}`)
+                .then(response => response.json())
+                .then(players => {
+                    players.forEach(player => {
+                        const option = document.createElement('option');
+                        option.value = player.id;
+                        option.textContent = player.name;
+                        playerSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading players:', error));
+        }
+    });
+</script>
+</body>
+</html>
