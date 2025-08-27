@@ -1,148 +1,3 @@
-<!--<!DOCTYPE html>-->
-<!--<html xmlns:th="http://www.thymeleaf.org">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>League Table - Football Stats</title>-->
-<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">-->
-<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">-->
-<!--    <style>-->
-<!--        .league-table {-->
-<!--            font-size: 0.95rem;-->
-<!--        }-->
-<!--        .position-badge {-->
-<!--            min-width: 30px;-->
-<!--            height: 30px;-->
-<!--            display: flex;-->
-<!--            align-items: center;-->
-<!--            justify-content: center;-->
-<!--            border-radius: 50%;-->
-<!--        }-->
-<!--        .top-3 { background-color: #28a745; color: white; }-->
-<!--        .top-half { background-color: #17a2b8; color: white; }-->
-<!--        .bottom-half { background-color: #ffc107; color: black; }-->
-<!--        .relegation { background-color: #dc3545; color: white; }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">-->
-<!--        <div class="container">-->
-<!--            <a class="navbar-brand" href="/">-->
-<!--                <i class="fas fa-futbol me-2"></i>Football Stats-->
-<!--            </a>-->
-<!--            <div class="navbar-nav ms-auto">-->
-<!--                <a class="nav-link" href="/">Add Action</a>-->
-<!--                <a class="nav-link" href="/statistics">Statistics</a>-->
-<!--                <a class="nav-link" href="/match-result">Add Match Result</a>-->
-<!--                <a class="nav-link active" href="/league">League Table</a>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </nav>-->
-
-<!--    <div class="container mt-4">-->
-<!--        <div class="row mb-4">-->
-<!--            <div class="col-md-8">-->
-<!--                <h2><i class="fas fa-table me-2"></i>League Table</h2>-->
-<!--                <p class="text-muted">Current standings based on match results</p>-->
-<!--            </div>-->
-<!--            <div class="col-md-4 text-end">-->
-<!--                <a href="/match-result" class="btn btn-success">-->
-<!--                    <i class="fas fa-plus me-2"></i>Add Match Result-->
-<!--                </a>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div class="card">-->
-<!--            <div class="card-body p-0">-->
-<!--                <div class="table-responsive">-->
-<!--                    <table class="table table-hover league-table mb-0">-->
-<!--                        <thead class="table-dark">-->
-<!--                            <tr>-->
-<!--                                <th class="text-center" style="width: 60px;">Pos</th>-->
-<!--                                <th>Club</th>-->
-<!--                                <th class="text-center">MP</th>-->
-<!--                                <th class="text-center">W</th>-->
-<!--                                <th class="text-center">D</th>-->
-<!--                                <th class="text-center">L</th>-->
-<!--                                <th class="text-center">GF</th>-->
-<!--                                <th class="text-center">GA</th>-->
-<!--                                <th class="text-center">GD</th>-->
-<!--                                <th class="text-center">Pts</th>-->
-<!--                            </tr>-->
-<!--                        </thead>-->
-<!--                        <tbody>-->
-<!--                            <tr th:each="club, iterStat : ${standings}">-->
-<!--                                <td class="text-center">-->
-<!--                                    <div class="position-badge"-->
-<!--                                         th:classappend="${iterStat.index < 3} ? 'top-4' :-->
-<!--                                                       (${iterStat.index < #lists.size(standings)/2} ? 'top-half' : -->
-<!--                                                       (${iterStat.index >= #lists.size(standings)-3} ? 'relegation' : 'bottom-half'))">-->
-<!--                                        <span th:text="${iterStat.index + 1}"></span>-->
-<!--                                    </div>-->
-<!--                                </td>-->
-<!--                                <td class="fw-semibold">-->
-<!--                                    <i class="fas fa-shield-alt me-2 text-primary"></i>-->
-<!--                                    <span th:text="${club.clubName}"></span>-->
-<!--                                </td>-->
-<!--                                <td class="text-center" th:text="${club.matchesPlayed}"></td>-->
-<!--                                <td class="text-center text-success fw-bold" th:text="${club.wins}"></td>-->
-<!--                                <td class="text-center text-warning fw-bold" th:text="${club.draws}"></td>-->
-<!--                                <td class="text-center text-danger fw-bold" th:text="${club.defeats}"></td>-->
-<!--                                <td class="text-center" th:text="${club.goalsFor}"></td>-->
-<!--                                <td class="text-center" th:text="${club.goalsAgainst}"></td>-->
-<!--                                <td class="text-center fw-bold" -->
-<!--                                    th:text="${club.goalDifference}"-->
-<!--                                    th:classappend="${club.goalDifference > 0} ? 'text-success' : -->
-<!--                                                  (${club.goalDifference < 0} ? 'text-danger' : 'text-muted')"></td>-->
-<!--                                <td class="text-center">-->
-<!--                                    <span class="badge bg-primary fs-6" th:text="${club.totalPoints}"></span>-->
-<!--                                </td>-->
-<!--                            </tr>-->
-<!--                            <tr th:if="${#lists.isEmpty(standings)}">-->
-<!--                                <td colspan="10" class="text-center text-muted py-4">-->
-<!--                                    <i class="fas fa-table fa-3x mb-3"></i>-->
-<!--                                    <p>No match results recorded yet</p>-->
-<!--                                    <a href="/match-result" class="btn btn-success">Add First Match Result</a>-->
-<!--                                </td>-->
-<!--                            </tr>-->
-<!--                        </tbody>-->
-<!--                    </table>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        &lt;!&ndash; Legend &ndash;&gt;-->
-<!--        <div class="row mt-3">-->
-<!--            <div class="col-12">-->
-<!--                <div class="card">-->
-<!--                    <div class="card-body">-->
-<!--                        <h6>Legend:</h6>-->
-<!--                        <div class="row">-->
-<!--                            <div class="col-md-6">-->
-<!--                                <small>-->
-<!--                                    <span class="badge top-3 me-2">1-4</span>Champions League (Group stage)-->
-<!--                                    <br>-->
-<!--                                    <span class="badge top-half me-2">5</span>Europa League (Group stage)-->
-<!--                                </small>-->
-<!--                            </div>-->
-<!--                            <div class="col-md-6">-->
-<!--                                <small>-->
-<!--                                    <span class="badge relegation me-2">18-20</span>Relegation Zone (EFL Championship)-->
-<!--                                    <br>-->
-<!--                                    MP: Matches Played, W: Won, D: Draw, L: Lost, GF: Goals For, GA: Goals Against, GD: Goal Difference, Pts: Points-->
-<!--                                </small>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-
-<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
-<!--</body>-->
-<!--</html>-->
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -168,6 +23,52 @@
         .top-half { background-color: #6c757d; color: white; }
         .bottom-half { background-color: #ffc107; color: black; }
         .relegation { background-color: #dc3545; color: white; }
+
+        .club-logo {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            border-radius: 2px;
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .club-logo:hover {
+            transform: scale(1.1);
+        }
+
+        /* Fallback for missing logos */
+        .club-logo.error {
+            display: none;
+        }
+
+        .club-logo-fallback {
+            display: none;
+            width: 24px;
+            height: 24px;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 50%;
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .club-logo.error + .club-logo-fallback {
+            display: flex;
+        }
+
+        .club-name-container {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .club-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
 </head>
 <body>
@@ -205,7 +106,7 @@
                     <thead class="table-dark">
                     <tr>
                         <th class="text-center" style="width: 60px;">Pos</th>
-                        <th>Club</th>
+                        <th style="min-width: 200px;">Club</th>
                         <th class="text-center">MP</th>
                         <th class="text-center">W</th>
                         <th class="text-center">D</th>
@@ -227,10 +128,24 @@
                                 <span th:text="${iterStat.index + 1}"></span>
                             </div>
                         </td>
+
                         <td class="fw-semibold">
-                            <i class="fas fa-shield-alt me-2 text-primary"></i>
-                            <span th:text="${club.clubName}"></span>
+                            <div class="d-flex align-items-center">
+                                <img th:src="${club.logoPath}"
+                                     th:alt="${club.clubName + ' logo'}"
+                                     class="club-logo me-2"
+                                     onerror="this.classList.add('error');">
+
+                                <div class="club-logo-fallback me-2">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+
+                                <div class="club-name-container">
+                                    <span class="club-name" th:text="${club.clubName}"></span>
+                                </div>
+                            </div>
                         </td>
+
                         <td class="text-center" th:text="${club.matchesPlayed}"></td>
                         <td class="text-center text-success fw-bold" th:text="${club.wins}"></td>
                         <td class="text-center text-warning fw-bold" th:text="${club.draws}"></td>

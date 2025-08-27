@@ -19,7 +19,7 @@ public interface MatchResultRepository extends JpaRepository<MatchResult, Long> 
 
     // Get club standings with all statistics
     @Query("SELECT new com.vbforge.footballstats.dto.ClubStandingsDTO(" +
-            "c.id, c.name, " +
+            "c.id, c.name, c.logoPath, " +
             "COUNT(mr), " +
             "SUM(CASE WHEN mr.points = 3 THEN 1 ELSE 0 END), " +
             "SUM(CASE WHEN mr.points = 1 THEN 1 ELSE 0 END), " +

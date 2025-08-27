@@ -11,6 +11,7 @@ public class ClubStandingsDTO {
 
     private Long clubId;
     private String clubName;
+    private String logoPath;
     private Integer matchesPlayed;
     private Integer wins;
     private Integer draws;
@@ -21,11 +22,12 @@ public class ClubStandingsDTO {
     private Integer goalDifference;
 
     // Constructor for query results
-    public ClubStandingsDTO(Long clubId, String clubName, Long matchesPlayed,
+    public ClubStandingsDTO(Long clubId, String clubName, String logoPath, Long matchesPlayed,
                             Long wins, Long draws, Long defeats, Long totalPoints,
                             Long goalsFor, Long goalsAgainst) {
         this.clubId = clubId;
         this.clubName = clubName;
+        this.logoPath = logoPath;
         this.matchesPlayed = matchesPlayed.intValue();
         this.wins = wins.intValue();
         this.draws = draws.intValue();
