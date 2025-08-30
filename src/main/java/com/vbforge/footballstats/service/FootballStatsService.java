@@ -11,7 +11,6 @@ import java.util.Optional;
 
 @Service
 public interface FootballStatsService {
-
     List<Club> getAllClubs();
     List<Player> getAllPlayers();
     List<Player> getPlayersByClub(Long clubId);
@@ -19,11 +18,14 @@ public interface FootballStatsService {
     List<PlayerStatisticsDTO> getAllPlayerStatistics();
     List<PlayerStatisticsDTO> getPlayerStatisticsByClub(Long clubId);
     StreakResultDTO calculatePlayerStreaks(Long playerId);
-    Optional<Player> findPlayer(Long playerId);
-
     void saveMatchResult(MatchResultFormDTO matchResultForm);
     List<ClubStandingsDTO> getClubStandings();
-    List<MatchResult> getClubMatchResults(Long clubId);
-    List<MatchResult> getMatchDayResults(Integer matchDayNumber);
+    ClubDetailDTO getClubDetail(Long clubId);
+    Club getClubById(Long clubId);
+    void updateClub(Club club);
 
+    List<PlayerStatsDTO> getClubTopScorers(Long clubId, int limit);
+    List<PlayerStatsDTO> getClubTopAssisters(Long clubId, int limit);
+
+    PlayerStatisticsDTO getPlayerDetail(Long playerId);
 }

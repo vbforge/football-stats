@@ -4,9 +4,12 @@ import com.vbforge.footballstats.dto.*;
 import com.vbforge.footballstats.entity.*;
 import com.vbforge.footballstats.repository.*;
 import com.vbforge.footballstats.service.FootballStatsService;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -45,7 +48,6 @@ public class FootballStatsServiceImpl implements FootballStatsService {
 
     @Override
     public List<Player> getPlayersByClub(Long clubId) {
-//        return playerRepository.findByClubId(clubId);
         return playerRepository.findByClub_Id(clubId);
     }
 
@@ -88,6 +90,60 @@ public class FootballStatsServiceImpl implements FootballStatsService {
         actionRepository.save(action);
 
     }
+
+    /*@Override
+    public List<PlayerStatisticsDTO> getAllPlayerStatistics() {
+        List<Object[]> results = actionRepository.getPlayerStatistics();
+        return results.stream()
+                .map(result -> {
+                    PlayerStatisticsDTO dto = new PlayerStatisticsDTO(
+                            (Long) result[0],      // playerId
+                            (String) result[1],    // playerName
+                            (String) result[2],    // playerPosition
+                            (Integer) result[3],    // playerAppearances
+                            (String) result[4],    // clubName
+                            (Integer) result[5],      // totalGoals
+                            (Integer) result[6],      // totalAssists
+                            (Integer) result[7],       // totalPoints
+                            (Integer) result[8],       // MaxGoalStreak
+                            (Integer) result[9]       // MaxAssistStreak
+                    );
+
+
+                    // Calculate streaks
+                    StreakResultDTO streaks = calculatePlayerStreaks(dto.getPlayerId());
+                    dto.setMaxGoalStreak(streaks.getMaxGoalStreak());
+                    dto.setMaxAssistStreak(streaks.getMaxAssistStreak());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayerStatisticsDTO> getPlayerStatisticsByClub(Long clubId) {
+        List<Object[]> results = actionRepository.getPlayerStatisticsByClub(clubId);
+        return results.stream()
+                .map(result -> {
+                    PlayerStatisticsDTO dto = new PlayerStatisticsDTO(
+                            (Long) result[0],      // playerId
+                            (String) result[1],    // playerName
+                            (String) result[2],    // playerPosition
+                            (Integer) result[3],    // playerAppearances
+                            (String) result[4],    // clubName
+                            (Integer) result[5],      // totalGoals
+                            (Integer) result[6],      // totalAssists
+                            (Integer) result[7],       // totalPoints
+                            (Integer) result[8],       // MaxGoalStreak
+                            (Integer) result[9]       // MaxAssistStreak
+                    );
+                    // Calculate streaks
+                    StreakResultDTO streaks = calculatePlayerStreaks(dto.getPlayerId());
+                    dto.setMaxGoalStreak(streaks.getMaxGoalStreak());
+                    dto.setMaxAssistStreak(streaks.getMaxAssistStreak());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }*/
 
     @Override
     public List<PlayerStatisticsDTO> getAllPlayerStatistics() {
@@ -164,11 +220,6 @@ public class FootballStatsServiceImpl implements FootballStatsService {
                 currentGoalStreak, currentAssistStreak);
     }
 
-    @Override
-    public Optional<Player> findPlayer(Long playerId) {
-        return playerRepository.findById(playerId);
-    }
-
     public void saveMatchResult(MatchResultFormDTO matchResultForm) {
         // Get or create match day
         MatchDay matchDay = matchDayRepository.findByNumber(matchResultForm.getMatchDayNumber())
@@ -203,33 +254,109 @@ public class FootballStatsServiceImpl implements FootballStatsService {
         matchResultRepository.save(matchResult);
     }
 
-//    public List<ClubStandingsDTO> getClubStandings() {
-//        List<Object[]> results = matchResultRepository.getClubStandings();
-//        return results.stream()
-//                .map(result -> new ClubStandingsDTO(
-//                        (Long) result[0],      // clubId
-//                        (String) result[1],    // clubName
-//                        (Long) result[2],      // matchesPlayed
-//                        (Long) result[3],      // wins
-//                        (Long) result[4],      // draws
-//                        (Long) result[5],      // defeats
-//                        (Long) result[6],      // totalPoints
-//                        (Long) result[7],      // goalsFor
-//                        (Long) result[8]       // goalsAgainst
-//                ))
-//                .collect(Collectors.toList());
-//    }
-
     public List<ClubStandingsDTO> getClubStandings() {
-        return matchResultRepository.getClubStandings(); // No mapping needed!
+        return matchResultRepository.getClubStandings();
     }
 
-    public List<MatchResult> getClubMatchResults(Long clubId) {
-        return matchResultRepository.findByClubIdOrderByMatchDay(clubId);
+    @Override
+    public ClubDetailDTO getClubDetail(Long clubId) {
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> new EntityNotFoundException("Club not found with id: " + clubId));
+
+        ClubDetailDTO dto = new ClubDetailDTO();
+
+        // Basic club info
+        dto.setId(club.getId());
+        dto.setName(club.getName());
+        dto.setLogoPath(club.getLogoPath());
+        dto.setCity(club.getCity());
+        dto.setFoundedYear(club.getFoundedYear());
+        dto.setStadium(club.getStadium());
+        dto.setStadiumCapacity(club.getStadiumCapacity());
+        dto.setDescription(club.getDescription());
+        dto.setWebsite(club.getWebsite());
+        dto.setNickname(club.getNickname());
+        dto.setStadiumImagePath(club.getStadiumImagePath());
+        dto.setPrimaryColor(club.getPrimaryColor());
+        dto.setSecondaryColor(club.getSecondaryColor());
+
+        // Get club statistics from league standings
+        List<ClubStandingsDTO> standings = getClubStandings();
+        ClubStandingsDTO clubStanding = standings.stream()
+                .filter(s -> s.getClubId().equals(clubId))
+                .findFirst()
+                .orElse(null);
+
+        if (clubStanding != null) {
+            dto.setMatchesPlayed(clubStanding.getMatchesPlayed());
+            dto.setWins(clubStanding.getWins());
+            dto.setDraws(clubStanding.getDraws());
+            dto.setDefeats(clubStanding.getDefeats());
+            dto.setTotalPoints(clubStanding.getTotalPoints());
+            dto.setGoalsFor(clubStanding.getGoalsFor());
+            dto.setGoalsAgainst(clubStanding.getGoalsAgainst());
+            dto.setGoalDifference(clubStanding.getGoalDifference());
+
+            // Calculate current position
+            dto.setCurrentPosition(standings.indexOf(clubStanding) + 1);
+        }
+
+        // Get player statistics using existing methods
+        dto.setTopScorers(getClubTopScorers(clubId, 5));
+        dto.setTopAssisters(getClubTopAssisters(clubId, 5));
+
+        // Calculate total players for this club
+        List<PlayerStatisticsDTO> allClubPlayers = getPlayerStatisticsByClub(clubId);
+        dto.setTotalPlayers(allClubPlayers.size());
+
+        return dto;
     }
 
-    public List<MatchResult> getMatchDayResults(Integer matchDayNumber) {
-        return matchResultRepository.findByMatchDayNumber(matchDayNumber);
+    @Override
+    public Club getClubById(Long clubId) {
+        return clubRepository.findById(clubId)
+                .orElseThrow(() -> new EntityNotFoundException("Club not found with id: " + clubId));
     }
 
+    @Override
+    public void updateClub(Club club) {
+        if (clubRepository.existsById(club.getId())) {
+            clubRepository.save(club);
+        } else {
+            throw new EntityNotFoundException("Club not found with id: " + club.getId());
+        }
+    }
+
+    @Override
+    public List<PlayerStatsDTO> getClubTopScorers(Long clubId, int limit) {
+        List<PlayerStatisticsDTO> playerStats = getPlayerStatisticsByClub(clubId);
+
+        return playerStats.stream()
+                .filter(p -> p.getTotalGoals() != null && p.getTotalGoals() > 0)
+                .sorted((p1, p2) -> Integer.compare(p2.getTotalGoals(), p1.getTotalGoals()))
+                .limit(limit)
+                .map(PlayerStatsDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayerStatsDTO> getClubTopAssisters(Long clubId, int limit) {
+        List<PlayerStatisticsDTO> playerStats = getPlayerStatisticsByClub(clubId);
+
+        return playerStats.stream()
+                .filter(p -> p.getTotalAssists() != null && p.getTotalAssists() > 0)
+                .sorted((p1, p2) -> Integer.compare(p2.getTotalAssists(), p1.getTotalAssists()))
+                .limit(limit)
+                .map(PlayerStatsDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public PlayerStatisticsDTO getPlayerDetail(Long playerId) {
+        List<PlayerStatisticsDTO> allPlayers = getAllPlayerStatistics();
+        return allPlayers.stream()
+                .filter(p -> p.getPlayerId().equals(playerId))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Player not found with id: " + playerId));
+    }
 }

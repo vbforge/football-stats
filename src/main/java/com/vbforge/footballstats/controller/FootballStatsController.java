@@ -119,12 +119,6 @@ public class FootballStatsController {
         return footballStatsService.calculatePlayerStreaks(playerId);
     }
 
-//    @GetMapping("/api/players/club/{clubId}")
-//    @ResponseBody
-//    public List<Player> getPlayersByClub(@PathVariable Long clubId) {
-//        return footballStatsService.getPlayersByClub(clubId);
-//    }
-
     @GetMapping("/api/players/club/{clubId}")
     @ResponseBody
     public List<PlayerDTO> getPlayersByClub(@PathVariable Long clubId) {

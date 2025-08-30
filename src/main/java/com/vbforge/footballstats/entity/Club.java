@@ -25,4 +25,34 @@ public class Club {
     @Column(name = "logo_path")
     private String logoPath;
 
+    @Column
+    private String city;
+
+    @Column(name = "founded_year")
+    private Integer foundedYear;
+
+    @Column
+    private String stadium;
+
+    @Column(name = "stadium_capacity")
+    private Integer stadiumCapacity;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column
+    private String website;
+
+    @Column
+    private String nickname;
+
+    @Column(name = "stadium_image_path")
+    private String stadiumImagePath;
+
+    @Column(name = "primary_color")
+    private String primaryColor;
+
+    @Column(name = "secondary_color")
+    private String secondaryColor;
+
 }

@@ -64,10 +64,19 @@
             flex: 1;
         }
 
-        .club-name {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .club-link {
+            transition: all 0.2s ease;
+        }
+
+        .club-link:hover {
+            background-color: rgba(0, 123, 255, 0.1);
+            border-radius: 4px;
+            padding: 4px;
+            margin: -4px;
+        }
+
+        .club-link:hover .club-name {
+            color: #007bff !important;
         }
     </style>
 </head>
@@ -130,7 +139,7 @@
                         </td>
 
                         <td class="fw-semibold">
-                            <div class="d-flex align-items-center">
+                            <a th:href="@{'/clubs/' + ${club.clubId}}" class="text-decoration-none text-dark d-flex align-items-center club-link">
                                 <img th:src="${club.logoPath}"
                                      th:alt="${club.clubName + ' logo'}"
                                      class="club-logo me-2"
@@ -143,7 +152,7 @@
                                 <div class="club-name-container">
                                     <span class="club-name" th:text="${club.clubName}"></span>
                                 </div>
-                            </div>
+                            </a>
                         </td>
 
                         <td class="text-center" th:text="${club.matchesPlayed}"></td>

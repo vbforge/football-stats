@@ -1,3 +1,4 @@
+-- Check all results
 SELECT * FROM football_stats.clubs;
 -- Check record exists
 SELECT * FROM clubs WHERE name = 'Chelsea';

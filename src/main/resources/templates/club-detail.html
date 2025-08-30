@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${club != null ? club.name + ' - Club Details' : 'Club Details'}">Club Details - Football Stats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .club-header {
+            background: linear-gradient(135deg, var(--primary-color, #007bff) 0%, var(--secondary-color, #0056b3) 100%);
+            color: white;
+            padding: 2rem 0;
+        }
+
+        .club-logo-large {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .position-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto 1rem auto;
+        }
+
+        .position-1-4 { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+        .position-5 { background: linear-gradient(135deg, #17a2b8, #20c997); color: white; }
+        .position-6-10 { background: linear-gradient(135deg, #6c757d, #495057); color: white; }
+        .position-11-17 { background: linear-gradient(135deg, #ffc107, #fd7e14); color: black; }
+        .position-18-20 { background: linear-gradient(135deg, #dc3545, #c82333); color: white; }
+
+        .player-card {
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+
+        .player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .stadium-image {
+            width: 100%;
+            height: 550px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .info-badge {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-futbol me-2"></i>Football Stats
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/">Add Action</a>
+            <a class="nav-link" href="/statistics">Statistics</a>
+            <a class="nav-link" href="/match-result">Add Match Result</a>
+            <a class="nav-link" href="/league">League Table</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Flash Messages -->
+<div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show m-3" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    <span th:text="${successMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<!-- Club Header -->
+<div class="club-header" th:style="${club.primaryColor != null ? 'background: linear-gradient(135deg, ' + club.primaryColor + ' 0%, ' + (club.secondaryColor ?: club.primaryColor) + ' 100%);' : ''}">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <img th:src="${club.logoPath}"
+                     th:alt="${club.name + ' logo'}"
+                     class="club-logo-large"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="club-logo-large d-none align-items-center justify-content-center" style="display: none;">
+                    <i class="fas fa-shield-alt fa-3x text-muted"></i>
+                </div>
+            </div>
+            <div class="col">
+                <h1 class="display-5 mb-2" th:text="${club.name}">Club Name</h1>
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                        <span th:if="${club.nickname}" class="badge info-badge">
+                            <i class="fas fa-star me-1"></i><span th:text="${club.nickname}"></span>
+                        </span>
+                    <span th:if="${club.city}" class="badge info-badge">
+                            <i class="fas fa-map-marker-alt me-1"></i><span th:text="${club.city}"></span>
+                        </span>
+                    <span th:if="${club.foundedYear}" class="badge info-badge">
+                            <i class="fas fa-calendar me-1"></i>Founded <span th:text="${club.foundedYear}"></span>
+                        </span>
+                    <span th:if="${club.stadium}" class="badge info-badge">
+                            <i class="fas fa-building me-1"></i><span th:text="${club.stadium}"></span>
+                        </span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="/league" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-2"></i>Back to League
+                    </a>
+                    <a th:href="@{'/clubs/' + ${club.id} + '/edit'}" class="btn btn-outline-light">
+                        <i class="fas fa-edit me-2"></i>Edit Club
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <!-- League Position & Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card text-center">
+                <div class="card-body">
+                    <div class="position-circle"
+                         th:classappend="${club.currentPosition != null && club.currentPosition <= 4} ? 'position-1-4' :
+                                           (${club.currentPosition != null && club.currentPosition == 5} ? 'position-5' :
+                                           (${club.currentPosition != null && club.currentPosition <= 10} ? 'position-6-10' :
+                                           (${club.currentPosition != null && club.currentPosition <= 17} ? 'position-11-17' : 'position-18-20')))">
+                        <span th:text="${club.currentPosition ?: 'N/A'}">1</span>
+                    </div>
+                    <h5>League Position</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-trophy text-warning" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2" th:text="${club.totalPoints ?: 0}">0</h3>
+                    <p class="text-muted mb-0">Points</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-futbol text-success" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2" th:text="${club.goalsFor ?: 0}">0</h3>
+                    <p class="text-muted mb-0">Goals For</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card text-center">
+                <div class="card-body">
+                    <i class="fas fa-users text-primary" style="font-size: 2.5rem;"></i>
+                    <h3 class="mt-2" th:text="${club.totalPlayers ?: 0}">0</h3>
+                    <p class="text-muted mb-0">Players</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Stats -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Season Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h4 th:text="${club.matchesPlayed ?: 0}" class="text-primary">0</h4>
+                            <small class="text-muted">Matches Played</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 th:text="${club.wins ?: 0}" class="text-success">0</h4>
+                            <small class="text-muted">Wins</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 th:text="${club.draws ?: 0}" class="text-warning">0</h4>
+                            <small class="text-muted">Draws</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h4 th:text="${club.defeats ?: 0}" class="text-danger">0</h4>
+                            <small class="text-muted">Defeats</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 th:text="${club.goalsAgainst ?: 0}" class="text-muted">0</h4>
+                            <small class="text-muted">Goals Against</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 th:text="${club.goalDifference ?: 0}"
+                                th:classappend="${club.goalDifference != null && club.goalDifference > 0} ? 'text-success' :
+                                                  (${club.goalDifference != null && club.goalDifference < 0} ? 'text-danger' : 'text-muted')">+0</h4>
+                            <small class="text-muted">Goal Difference</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Club Info</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${club.website}" class="mb-2">
+                        <strong>Website:</strong><br>
+                        <a th:href="${club.website}" target="_blank" class="text-decoration-none">
+                            <i class="fas fa-external-link-alt me-1"></i><span th:text="${club.website}">Website</span>
+                        </a>
+                    </div>
+                    <div th:if="${club.stadiumCapacity}" class="mb-2">
+                        <strong>Stadium Capacity:</strong><br>
+                        <span th:text="${#numbers.formatInteger(club.stadiumCapacity, 0, 'COMMA')}">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stadium Image -->
+    <div th:if="${club.stadiumImagePath}" class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-building me-2"></i>
+                        <span th:text="${club.stadium ?: 'Stadium'}">Stadium</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <img th:src="${club.stadiumImagePath}"
+                         th:alt="${club.stadium + ' stadium'}"
+                         class="stadium-image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description -->
+    <div th:if="${club.description}" class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>About the Club</h5>
+                </div>
+                <div class="card-body">
+                    <p th:text="${club.description}" class="mb-0">Club description</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Players -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Top Scorers</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${club.topScorers != null && !club.topScorers.empty}">
+                        <div th:each="player, iterStat : ${club.topScorers}" class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong th:text="${player.name}">Player Name</strong>
+                                <br>
+                                <small class="text-muted" th:text="${player.position}">Position</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-warning text-dark fs-6" th:text="${player.goals}">0</span>
+                                <br>
+                                <small class="text-muted">goals</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${club.topScorers == null || club.topScorers.empty}" class="text-center text-muted py-3">
+                        <i class="fas fa-user-slash fa-2x mb-2"></i>
+                        <p>No scorer data available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-hands-helping me-2"></i>Top Assisters</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${club.topAssisters != null && !club.topAssisters.empty}">
+                        <div th:each="player, iterStat : ${club.topAssisters}" class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong th:text="${player.name}">Player Name</strong>
+                                <br>
+                                <small class="text-muted" th:text="${player.position}">Position</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-info fs-6" th:text="${player.assists}">0</span>
+                                <br>
+                                <small class="text-muted">assists</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${club.topAssisters == null || club.topAssisters.empty}" class="text-center text-muted py-3">
+                        <i class="fas fa-user-slash fa-2x mb-2"></i>
+                        <p>No assist data available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Club Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a th:href="@{'/clubs/' + ${club.id} + '/edit'}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit me-2"></i>Edit Club Info
+                        </a>
+                        <a href="/league" class="btn btn-outline-secondary">
+                            <i class="fas fa-table me-2"></i>Back to League Table
+                        </a>
+                        <a href="/statistics" class="btn btn-outline-info">
+                            <i class="fas fa-chart-bar me-2"></i>View Statistics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

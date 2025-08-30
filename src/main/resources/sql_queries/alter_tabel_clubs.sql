@@ -1,0 +1,10 @@
+ALTER TABLE clubs ADD COLUMN city VARCHAR(255);
+ALTER TABLE clubs ADD COLUMN founded_year INT;
+ALTER TABLE clubs ADD COLUMN stadium VARCHAR(255);
+ALTER TABLE clubs ADD COLUMN stadium_capacity INT;
+ALTER TABLE clubs ADD COLUMN description TEXT;
+ALTER TABLE clubs ADD COLUMN website VARCHAR(255);
+ALTER TABLE clubs ADD COLUMN nickname VARCHAR(255);
+ALTER TABLE clubs ADD COLUMN stadium_image_path VARCHAR(255);
+ALTER TABLE clubs ADD COLUMN primary_color VARCHAR(7);
+ALTER TABLE clubs ADD COLUMN secondary_color VARCHAR(7);

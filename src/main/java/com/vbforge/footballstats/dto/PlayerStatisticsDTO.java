@@ -9,6 +9,8 @@ public class PlayerStatisticsDTO {
 
     private Long playerId;
     private String playerName;
+    private String position;
+    private Integer appearances;
     private String clubName;
     private Integer totalGoals;
     private Integer totalAssists;
