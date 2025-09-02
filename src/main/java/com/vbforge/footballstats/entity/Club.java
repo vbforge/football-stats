@@ -22,6 +22,9 @@ public class Club {
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Player> players;
 
+    @Column
+    private String coach;
+
     @Column(name = "logo_path")
     private String logoPath;
 

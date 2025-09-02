@@ -91,60 +91,6 @@ public class FootballStatsServiceImpl implements FootballStatsService {
 
     }
 
-    /*@Override
-    public List<PlayerStatisticsDTO> getAllPlayerStatistics() {
-        List<Object[]> results = actionRepository.getPlayerStatistics();
-        return results.stream()
-                .map(result -> {
-                    PlayerStatisticsDTO dto = new PlayerStatisticsDTO(
-                            (Long) result[0],      // playerId
-                            (String) result[1],    // playerName
-                            (String) result[2],    // playerPosition
-                            (Integer) result[3],    // playerAppearances
-                            (String) result[4],    // clubName
-                            (Integer) result[5],      // totalGoals
-                            (Integer) result[6],      // totalAssists
-                            (Integer) result[7],       // totalPoints
-                            (Integer) result[8],       // MaxGoalStreak
-                            (Integer) result[9]       // MaxAssistStreak
-                    );
-
-
-                    // Calculate streaks
-                    StreakResultDTO streaks = calculatePlayerStreaks(dto.getPlayerId());
-                    dto.setMaxGoalStreak(streaks.getMaxGoalStreak());
-                    dto.setMaxAssistStreak(streaks.getMaxAssistStreak());
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<PlayerStatisticsDTO> getPlayerStatisticsByClub(Long clubId) {
-        List<Object[]> results = actionRepository.getPlayerStatisticsByClub(clubId);
-        return results.stream()
-                .map(result -> {
-                    PlayerStatisticsDTO dto = new PlayerStatisticsDTO(
-                            (Long) result[0],      // playerId
-                            (String) result[1],    // playerName
-                            (String) result[2],    // playerPosition
-                            (Integer) result[3],    // playerAppearances
-                            (String) result[4],    // clubName
-                            (Integer) result[5],      // totalGoals
-                            (Integer) result[6],      // totalAssists
-                            (Integer) result[7],       // totalPoints
-                            (Integer) result[8],       // MaxGoalStreak
-                            (Integer) result[9]       // MaxAssistStreak
-                    );
-                    // Calculate streaks
-                    StreakResultDTO streaks = calculatePlayerStreaks(dto.getPlayerId());
-                    dto.setMaxGoalStreak(streaks.getMaxGoalStreak());
-                    dto.setMaxAssistStreak(streaks.getMaxAssistStreak());
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }*/
-
     @Override
     public List<PlayerStatisticsDTO> getAllPlayerStatistics() {
         List<Object[]> results = actionRepository.getPlayerStatistics();
@@ -268,6 +214,7 @@ public class FootballStatsServiceImpl implements FootballStatsService {
         // Basic club info
         dto.setId(club.getId());
         dto.setName(club.getName());
+        dto.setCoach(club.getCoach());
         dto.setLogoPath(club.getLogoPath());
         dto.setCity(club.getCity());
         dto.setFoundedYear(club.getFoundedYear());
@@ -358,5 +305,38 @@ public class FootballStatsServiceImpl implements FootballStatsService {
                 .filter(p -> p.getPlayerId().equals(playerId))
                 .findFirst()
                 .orElseThrow(() -> new EntityNotFoundException("Player not found with id: " + playerId));
+    }
+
+
+    @Override
+    public Player getPlayerById(Long playerId) {
+        return playerRepository.findById(playerId)
+                .orElseThrow(() -> new EntityNotFoundException("Player not found with id: " + playerId));
+    }
+
+    @Override
+    public void updatePlayer(Player player) {
+        if (playerRepository.existsById(player.getId())) {
+            playerRepository.save(player);
+        } else {
+            throw new EntityNotFoundException("Player not found with id: " + player.getId());
+        }
+    }
+
+    @Override
+    public void deletePlayer(Long playerId) {
+        if (playerRepository.existsById(playerId)) {
+            // First delete all actions related to this player
+            actionRepository.deleteByPlayerId(playerId);
+            // Then delete the player
+            playerRepository.deleteById(playerId);
+        } else {
+            throw new EntityNotFoundException("Player not found with id: " + playerId);
+        }
+    }
+
+    @Override
+    public void savePlayer(Player player) {
+        playerRepository.save(player);
     }
 }

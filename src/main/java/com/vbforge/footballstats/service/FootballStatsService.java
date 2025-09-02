@@ -28,4 +28,9 @@ public interface FootballStatsService {
     List<PlayerStatsDTO> getClubTopAssisters(Long clubId, int limit);
 
     PlayerStatisticsDTO getPlayerDetail(Long playerId);
+
+    Player getPlayerById(Long playerId);
+    void updatePlayer(Player player);
+    void deletePlayer(Long playerId);
+    void savePlayer(Player player);
 }

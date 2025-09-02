@@ -138,7 +138,11 @@
                     <a th:href="@{'/clubs/' + ${club.id} + '/edit'}" class="btn btn-outline-light">
                         <i class="fas fa-edit me-2"></i>Edit Club
                     </a>
+                    <a th:href="@{'/clubs/' + ${club.id} + '/squad/manage'}" class="btn btn-outline-light">
+                        <i class="fas fa-users-cog me-2"></i>Squad Management
+                    </a>
                 </div>
+
             </div>
         </div>
     </div>
@@ -248,6 +252,10 @@
                         <strong>Stadium Capacity:</strong><br>
                         <span th:text="${#numbers.formatInteger(club.stadiumCapacity, 0, 'COMMA')}">0</span>
                     </div>
+                    <div th:if="${club.coach}" class="mb-2">
+                        <strong>Coach:</strong><br>
+                        <span th:text="${club.coach}">Coach</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -265,7 +273,7 @@
                 </div>
                 <div class="card-body p-0">
                     <img th:src="${club.stadiumImagePath}"
-                         th:alt="${club.stadium + ' stadium'}"
+                         th:alt="${club.stadium}"
                          class="stadium-image">
                 </div>
             </div>
@@ -303,8 +311,8 @@
                             </div>
                             <div class="text-end">
                                 <span class="badge bg-warning text-dark fs-6" th:text="${player.goals}">0</span>
-                                <br>
-                                <small class="text-muted">goals</small>
+<!--                                <br>-->
+<!--                                <small class="text-muted">goals</small>-->
                             </div>
                         </div>
                     </div>
@@ -330,8 +338,8 @@
                             </div>
                             <div class="text-end">
                                 <span class="badge bg-info fs-6" th:text="${player.assists}">0</span>
-                                <br>
-                                <small class="text-muted">assists</small>
+<!--                                <br>-->
+<!--                                <small class="text-muted">assists</small>-->
                             </div>
                         </div>
                     </div>
@@ -359,8 +367,18 @@
                         <a href="/league" class="btn btn-outline-secondary">
                             <i class="fas fa-table me-2"></i>Back to League Table
                         </a>
+                        <a th:href="@{/statistics/club/{id}(id=${club.id})}"
+                           class="btn btn-outline-info"
+                           th:classappend="${selectedClubId == club.id} ? ' active' : ''">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            <span th:text="${club.name + ' Players Statistics'}">Club Players Statistics</span>
+                        </a>
                         <a href="/statistics" class="btn btn-outline-info">
-                            <i class="fas fa-chart-bar me-2"></i>View Statistics
+                            <i class="fas fa-chart-bar me-2"></i>All Players Statistics
+                        </a>
+                        <a th:href="@{${club.id} + '/squad'}" class="btn btn-outline-primary">
+                            <i class="fas fa-users me-2"></i>
+                            <span th:text="${club.name + ' Squad'}">Club Squad</span>
                         </a>
                     </div>
                 </div>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title th:text="${(player != null and player.id != null ? 'Edit ' : 'Add New ')
+                 + 'Player'
+                 + (club != null ? ' - ' + club.name : '')
+                 + ' - Football Stats'}">
+    Edit Player - Football Stats
+</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .club-header {
+            background: linear-gradient(135deg, var(--primary-color, #007bff) 0%, var(--secondary-color, #0056b3) 100%);
+            color: white;
+            padding: 1.5rem 0;
+        }
+
+        .club-logo-small {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            background: white;
+            border-radius: 8px;
+            padding: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .form-card {
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+
+        .position-option {
+            margin-bottom: 0.5rem;
+        }
+
+        .position-option input[type="radio"] {
+            display: none;
+        }
+
+        .position-option label {
+            display: block;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .position-option input[type="radio"]:checked + label {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .position-option label:hover {
+            border-color: #007bff;
+            background-color: rgba(0,123,255,0.1);
+        }
+
+        .info-badge {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-futbol me-2"></i>Football Stats
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/">Add Action</a>
+            <a class="nav-link" href="/statistics">Statistics</a>
+            <a class="nav-link" href="/match-result">Add Match Result</a>
+            <a class="nav-link" href="/league">League Table</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Flash Messages -->
+<div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <span th:text="${errorMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<!-- Club Header -->
+<div class="club-header" th:style="${club != null && club.primaryColor != null ? 'background: linear-gradient(135deg, ' + club.primaryColor + ' 0%, ' + (club.secondaryColor ?: club.primaryColor) + ' 100%);' : ''}">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-auto" th:if="${club != null}">
+                <img th:src="${club.logoPath}"
+                     th:alt="${club.name + ' logo'}"
+                     class="club-logo-small"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="club-logo-small d-none align-items-center justify-content-center" style="display: none;">
+                    <i class="fas fa-shield-alt fa-2x text-muted"></i>
+                </div>
+            </div>
+            <div class="col">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-user-edit me-2"></i>
+                    <span th:text="${player.id != null ? 'Edit Player' : 'Add New Player'}">Edit Player</span>
+                </h1>
+                <div class="d-flex flex-wrap gap-2" th:if="${club != null}">
+                        <span class="badge info-badge">
+                            <i class="fas fa-shield-alt me-1"></i><span th:text="${club.name}">Club Name</span>
+                        </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card form-card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user me-2"></i>
+                        <span th:text="${player.id != null ? 'Edit Player: ' + player.name : 'Add New Player'}">Player Information</span>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form th:action="${player.id != null ? '/players/' + player.id + '/update' : '/clubs/' + club.id + '/players'}"
+                          th:object="${player}" method="post">
+                        <input type="hidden" th:field="*{id}" th:if="${player.id != null}">
+                        <input type="hidden" name="clubId" th:value="${club != null ? club.id : ''}">
+
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="name" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="name" th:field="*{name}" required
+                                       placeholder="Enter player's full name">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="shirtNumber" class="form-label">Shirt Number</label>
+                                <input type="number" class="form-control" id="shirtNumber" th:field="*{shirtNumber}"
+                                       min="1" max="99" placeholder="1-99">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Position *</label>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="position-option">
+                                        <input type="radio" id="goalkeeper" th:field="*{position}" value="GOALKEEPER">
+                                        <label for="goalkeeper">
+                                            <i class="fas fa-hand-paper text-purple me-2"></i>Goalkeeper
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-option">
+                                        <input type="radio" id="defender" th:field="*{position}" value="DEFENDER">
+                                        <label for="defender">
+                                            <i class="fas fa-shield-alt text-success me-2"></i>Defender
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-option">
+                                        <input type="radio" id="midfielder" th:field="*{position}" value="MIDFIELDER">
+                                        <label for="midfielder">
+                                            <i class="fas fa-running text-warning me-2"></i>Midfielder
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-option">
+                                        <input type="radio" id="forward" th:field="*{position}" value="FORWARD">
+                                        <label for="forward">
+                                            <i class="fas fa-futbol text-danger me-2"></i>Forward
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="nationality" class="form-label">Nationality</label>
+                                <input type="text" class="form-control" id="nationality" th:field="*{nationality}"
+                                       placeholder="e.g., England, Brazil, Spain">
+                            </div>
+                            <!-- dropdown flags choice -->
+                            <div class="col-md-6">
+                                <label for="flagPath" class="form-label">Flag Path</label>
+                                <select class="form-select" id="flagPath" th:field="*{flagPath}">
+                                    <option value="">-- Select Flag --</option>
+                                    <option value="/images/nationalities/ao.svg">Angola</option>
+                                    <option value="/images/nationalities/ar.svg">Argentina</option>
+                                    <option value="/images/nationalities/at.svg">Austria</option>
+                                    <option value="/images/nationalities/au.svg">Australia</option>
+                                    <option value="/images/nationalities/ba.svg">Bosnia & Herzegovina</option>
+                                    <option value="/images/nationalities/be.svg">Belgium</option>
+                                    <option value="/images/nationalities/bf.svg">Burkina Faso</option>
+                                    <option value="/images/nationalities/cd.svg">DR Congo</option>
+                                    <option value="/images/nationalities/ch.svg">Switzerland</option>
+                                    <option value="/images/nationalities/ci.svg">Cote d’Ivoire</option>
+                                    <option value="/images/nationalities/cm.svg">Cameron</option>
+                                    <option value="/images/nationalities/co.svg">Colombia</option>
+                                    <option value="/images/nationalities/cz.svg">Czech Republic</option>
+                                    <option value="/images/nationalities/de.svg">Germany</option>
+                                    <option value="/images/nationalities/dk.svg">Denmark</option>
+                                    <option value="/images/nationalities/do.svg">Dominican Republic</option>
+                                    <option value="/images/nationalities/dz.svg">Algeria</option>
+                                    <option value="/images/nationalities/ec.svg">Ecuador</option>
+                                    <option value="/images/nationalities/es.svg">Spain</option>
+                                    <option value="/images/nationalities/fi.svg">Finland</option>
+                                    <option value="/images/nationalities/fr.svg">France</option>
+                                    <option value="/images/nationalities/gb-eng.svg">England</option>
+                                    <option value="/images/nationalities/gb-nir.svg">Northern Ireland</option>
+                                    <option value="/images/nationalities/gb-sct.svg">Scotland</option>
+                                    <option value="/images/nationalities/gb-wls.svg">Welsh</option>
+                                    <option value="/images/nationalities/gh.svg">Ghana</option>
+                                    <option value="/images/nationalities/gw.svg">Guinea Bissau</option>
+                                    <option value="/images/nationalities/hr.svg">Croatia</option>
+                                    <option value="/images/nationalities/ie.svg">Ireland</option>
+                                    <option value="/images/nationalities/it.svg">Italy</option>
+                                    <option value="/images/nationalities/jm.svg">Jamaica</option>
+                                    <option value="/images/nationalities/jp.svg">Japan</option>
+                                    <option value="/images/nationalities/ma.svg">Morocco</option>
+                                    <option value="/images/nationalities/ml.svg">Mali</option>
+                                    <option value="/images/nationalities/mx.svg">Mexico</option>
+                                    <option value="/images/nationalities/ng.svg">Nigeria</option>
+                                    <option value="/images/nationalities/nl.svg">Netherlands</option>
+                                    <option value="/images/nationalities/no.svg">Norway</option>
+                                    <option value="/images/nationalities/nz.svg">New Zeeland</option>
+                                    <option value="/images/nationalities/pl.svg">Poland</option>
+                                    <option value="/images/nationalities/pt.svg">Portugal</option>
+                                    <option value="/images/nationalities/py.svg">Paraguay</option>
+                                    <option value="/images/nationalities/ro.svg">Romania</option>
+                                    <option value="/images/nationalities/rs.svg">Serbia</option>
+                                    <option value="/images/nationalities/se.svg">Sweden</option>
+                                    <option value="/images/nationalities/si.svg">Slovenia</option>
+                                    <option value="/images/nationalities/tr.svg">Turkey</option>
+                                    <option value="/images/nationalities/tt.svg">Trinidad & Tobago</option>
+                                    <option value="/images/nationalities/us.svg">United States</option>
+                                    <option value="/images/nationalities/uy.svg">Uruguay</option>
+                                    <option value="/images/nationalities/za.svg">South Africa</option>
+                                    <option value="/images/nationalities/zw.svg">Zimbabwe</option>
+
+
+                                    <!-- add more as needed -->
+                                </select>
+                                <div class="form-text">Choose the flag for nationality</div>
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="dateOfBirth" class="form-label">Date of Birth *</label>
+                            <input type="date" class="form-control" id="dateOfBirth" th:field="*{dateOfBirth}" required
+                                   th:max="${T(java.time.LocalDate).now().toString()}">
+                            <div class="form-text">Player must be born before today</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a th:href="${player.id != null ? '/players/' + player.id : '/clubs/' + club.id + '/squad/manage'}"
+                                   class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>
+                                    <span th:text="${player.id != null ? 'Update Player' : 'Add Player'}">Save Player</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Preview Card (for existing players) -->
+            <div th:if="${player.id != null}" class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-eye me-2"></i>Player Preview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-auto">
+                            <div class="player-number bg-primary text-white d-flex align-items-center justify-content-center"
+                                 style="width: 50px; height: 50px; border-radius: 50%; font-size: 1.25rem; font-weight: bold;"
+                                 th:text="${player.shirtNumber ?: '?'}">
+                                10
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h6 class="mb-1" th:text="${player.name ?: 'Player Name'}">Player Name</h6>
+                            <div class="d-flex gap-2">
+                                    <span class="badge bg-secondary"
+                                          th:text="${player.position != null ? player.position.name() : 'Position'}">
+                                        MIDFIELDER
+                                    </span>
+                                <span th:if="${player.nationality}" class="badge bg-info">
+                                        <span th:text="${player.nationality}">Nationality</span>
+                                    </span>
+                            </div>
+                            <small class="text-muted"
+                                   th:text="${player.dateOfBirth != null ? 'Born: ' + #temporals.format(player.dateOfBirth, 'dd/MM/yyyy') : 'Date of Birth not set'}">
+                                Born: 01/01/1990
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const select = document.getElementById("flagPath");
+        const options = Array.from(select.options)
+            .filter(opt => opt.value !== ""); // keep "-- Select Flag --" on top
+
+        // sort alphabetically by text
+        options.sort((a, b) => a.text.localeCompare(b.text));
+
+        // remove old and re-append sorted
+        select.length = 1; // keep only the first option
+        options.forEach(opt => select.add(opt));
+    });
+</script>
+</body>
+</html>

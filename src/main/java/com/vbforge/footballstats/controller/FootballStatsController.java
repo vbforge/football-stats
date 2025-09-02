@@ -8,7 +8,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -124,8 +126,17 @@ public class FootballStatsController {
     public List<PlayerDTO> getPlayersByClub(@PathVariable Long clubId) {
         return footballStatsService.getPlayersByClub(clubId)
                 .stream()
-                .map(p -> new PlayerDTO(p.getId(), p.getName()))
+                .map(p -> new PlayerDTO(
+                        p.getId(),
+                        p.getName(),
+                        p.getNationality(),
+                        p.getFlagPath(),
+                        p.getDateOfBirth(),
+                        p.getPosition(),
+                        p.getShirtNumber()
+                ))
                 .toList();
+
     }
 
     @GetMapping("/league")
@@ -155,6 +166,23 @@ public class FootballStatsController {
                     "Error adding match result: " + e.getMessage());
         }
         return "redirect:/match-result";
+    }
+
+    @GetMapping("/squad")
+    public String viewAllSquads(Model model) {
+        List<Player> allPlayers = footballStatsService.getAllPlayers();
+
+        // Group players by position
+        Map<Player.Position, List<Player>> playersByPosition = allPlayers.stream()
+                .collect(Collectors.groupingBy(Player::getPosition));
+
+        model.addAttribute("players", allPlayers);
+        model.addAttribute("goalkeepers", playersByPosition.getOrDefault(Player.Position.GOALKEEPER, List.of()));
+        model.addAttribute("defenders", playersByPosition.getOrDefault(Player.Position.DEFENDER, List.of()));
+        model.addAttribute("midfielders", playersByPosition.getOrDefault(Player.Position.MIDFIELDER, List.of()));
+        model.addAttribute("forwards", playersByPosition.getOrDefault(Player.Position.FORWARD, List.of()));
+
+        return "squad";
     }
 
 }

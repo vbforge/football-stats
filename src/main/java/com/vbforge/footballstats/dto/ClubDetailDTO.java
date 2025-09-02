@@ -13,6 +13,7 @@ public class ClubDetailDTO {
 
     private Long id;
     private String name;
+    private String coach;
     private String logoPath;
     private String city;
     private Integer foundedYear;

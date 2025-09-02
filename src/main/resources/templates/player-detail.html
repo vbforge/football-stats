@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${player != null ? player.name + ' - Player Details' : 'Player Details'} + ' - Football Stats'">
+        Player Details - Football Stats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .player-header {
+            background: linear-gradient(135deg, var(--primary-color, #007bff) 0%, var(--secondary-color, #0056b3) 100%);
+            color: white;
+            padding: 2rem 0;
+        }
+
+        .club-logo-small {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            background: white;
+            border-radius: 8px;
+            padding: 6px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .player-number-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            margin: 0 auto 1rem auto;
+        }
+
+        .position-badge-large {
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 15px;
+        }
+
+        .position-gk {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .position-def {
+            background: #198754;
+            color: white;
+        }
+
+        .position-mid {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .position-fwd {
+            background: #dc3545;
+            color: white;
+        }
+
+        .stat-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .flag-icon-large {
+            width: 40px;
+            height: 30px;
+            object-fit: cover;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-futbol me-2"></i>Football Stats
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/">Add Action</a>
+            <a class="nav-link" href="/statistics">Statistics</a>
+            <a class="nav-link" href="/match-result">Add Match Result</a>
+            <a class="nav-link" href="/league">League Table</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Flash Messages -->
+<div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show m-3" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    <span th:text="${successMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<!-- Player Header -->
+<div class="player-header"
+     th:style="${player != null && player.club != null && player.club.primaryColor != null ? 'background: linear-gradient(135deg, ' + player.club.primaryColor + ' 0%, ' + (player.club.secondaryColor ?: player.club.primaryColor) + ' 100%);' : ''}">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-auto" th:if="${player != null && player.club != null}">
+                <img th:src="${player.club.logoPath}"
+                     th:alt="${player.club.name + ' logo'}"
+                     class="club-logo-small"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="club-logo-small d-none align-items-center justify-content-center" style="display: none;">
+                    <i class="fas fa-shield-alt fa-2x text-muted"></i>
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="player-number-large" th:text="${player != null ? (player.shirtNumber ?: '?') : '?'}">10
+                </div>
+            </div>
+            <div class="col">
+                <h1 class="display-6 mb-2" th:text="${player != null ? player.name : 'Player Name'}">Player Name</h1>
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <span class="badge position-badge-large"
+                          th:if="${player != null && player.position != null}"
+                          th:classappend="${player.position.name() == 'GOALKEEPER'} ? 'position-gk' :
+                                         (${player.position.name() == 'DEFENDER'} ? 'position-def' :
+                                         (${player.position.name() == 'MIDFIELDER'} ? 'position-mid' : 'position-fwd'))"
+                          th:text="${player.position.name() == 'GOALKEEPER'} ? 'Goalkeeper' :
+                                   (${player.position.name() == 'DEFENDER'} ? 'Defender' :
+                                   (${player.position.name() == 'MIDFIELDER'} ? 'Midfielder' : 'Forward'))">
+                        Position
+                    </span>
+                    <span th:if="${player != null && player.club != null}" class="badge info-badge">
+                        <i class="fas fa-shield-alt me-1"></i><span th:text="${player.club.name}">Club</span>
+                    </span>
+
+                    <span th:if="${player != null and not #strings.isEmpty(player.nationality)}"
+                          class="badge info-badge">
+                            <img th:if="${not #strings.isEmpty(player.flagPath)}" th:src="${player.flagPath}"
+                            th:alt="${player.nationality}" class="me-1" style="width: 16px; height: 12px;">
+                        <span th:text="${player.nationality}">Nationality</span>
+                    </span>
+
+                </div>
+                <div class="d-flex gap-2">
+                    <a th:href="${player != null && player.club != null ? '/clubs/' + player.club.id + '/squad/manage' : '/league'}"
+                       class="btn btn-light btn-sm">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Squad
+                    </a>
+                    <a th:href="@{'/players/' + ${player.id} + '/edit'}" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-edit me-2"></i>Edit Player
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <!-- Player Info & Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Player Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3" th:if="${player != null && player.dateOfBirth != null}">
+                        <strong>Date of Birth:</strong><br>
+                        <span th:text="${#temporals.format(player.dateOfBirth, 'dd/MM/yyyy')}">01/01/1990</span>
+                    </div>
+                    <div class="mb-3" th:if="${player != null && player.dateOfBirth != null}">
+                        <strong>Age:</strong><br>
+                        <span th:text="${T(java.time.Period).between(player.dateOfBirth, T(java.time.LocalDate).now()).getYears()}">25</span>
+                        years old
+                    </div>
+
+                    <div class="mb-3" th:if="${player != null and not #strings.isEmpty(player.nationality)}">
+                        <strong>Nationality:</strong><br>
+                        <div class="d-flex align-items-center">
+                            <img th:if="${not #strings.isEmpty(player.flagPath)}" th:src="${player.flagPath}"
+                                 th:alt="${player.nationality}" class="flag-icon-large me-2">
+                            <span th:text="${player.nationality}">Nationality</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" th:if="${player != null and not #strings.isEmpty(player.shirtNumber)}">
+                        <strong>Shirt Number:</strong><br>
+                        <span th:text="${player.shirtNumber}">10</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card stat-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Season Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-3">
+                            <h3 class="text-success" th:text="${playerStats != null ? playerStats.totalGoals : 0}">
+                                0</h3>
+                            <p class="text-muted mb-0">Goals</p>
+                        </div>
+                        <div class="col-3">
+                            <h3 class="text-info" th:text="${playerStats != null ? playerStats.totalAssists : 0}">0</h3>
+                            <p class="text-muted mb-0">Assists</p>
+                        </div>
+                        <div class="col-3">
+                            <h3 class="text-warning" th:text="${playerStats != null ? playerStats.totalPoints : 0}">
+                                0</h3>
+                            <p class="text-muted mb-0">Total Points</p>
+                        </div>
+                        <div class="col-3">
+                            <h3 class="text-primary" th:text="${playerStats != null ? playerStats.maxGoalStreak : 0}">
+                                0</h3>
+                            <p class="text-muted mb-0">Goal Streak</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-secondary"
+                                th:text="${playerStats != null ? playerStats.maxAssistStreak : 0}">0</h4>
+                            <p class="text-muted mb-0">Max Assist Streak</p>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-secondary"
+                                th:text="${playerStats != null && playerStats.totalGoals != null && playerStats.totalAssists != null ?
+                                         (playerStats.totalGoals + playerStats.totalAssists) : 0}">0</h4>
+                            <p class="text-muted mb-0">Goal Contributions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Player Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a th:href="@{'/players/' + ${player.id} + '/edit'}" class="btn btn-outline-warning">
+                            <i class="fas fa-edit me-2"></i>Edit Player
+                        </a>
+                        <a th:href="${player != null && player.club != null ? '/clubs/' + player.club.id + '/squad/manage' : '/league'}"
+                           class="btn btn-outline-secondary">
+                            <i class="fas fa-users me-2"></i>Back to Squad Management
+                        </a>
+                        <a th:href="${player != null && player.club != null ? '/clubs/' + player.club.id + '/squad' : '/squad'}"
+                           class="btn btn-outline-info">
+                            <i class="fas fa-eye me-2"></i>View Squad
+                        </a>
+
+                        <button type="button" class="btn btn-outline-danger btn-action"
+                                th:data-id="${player.id}"
+                                th:data-name="${player.name}"
+                                onclick="confirmDelete(this.dataset.id, this.dataset.name)"
+                                title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete player <strong id="playerNameToDelete"></strong>?</p>
+                <p class="text-danger"><small><i class="fas fa-exclamation-triangle me-1"></i>This action cannot be
+                    undone and will remove all associated statistics.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <input type="hidden" name="_method" value="delete">
+                    <button type="submit" class="btn btn-danger">Delete Player</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function confirmDelete(playerId, playerName) {
+        document.getElementById('playerNameToDelete').textContent = playerName;
+        document.getElementById('deleteForm').action = '/players/' + playerId + '/delete';
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+</script>
+</body>
+</html>

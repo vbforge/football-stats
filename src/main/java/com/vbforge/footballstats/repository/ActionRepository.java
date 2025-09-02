@@ -34,4 +34,5 @@ public interface ActionRepository extends JpaRepository<Action, Long> {
             "ORDER BY totalPoints DESC")
     List<Object[]> getPlayerStatisticsByClub(@Param("clubId") Long clubId);
 
+    void deleteByPlayerId(Long playerId);
 }
