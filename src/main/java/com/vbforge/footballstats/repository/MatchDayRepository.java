@@ -12,4 +12,5 @@ public interface MatchDayRepository extends JpaRepository<MatchDay, Long> {
 
     Optional<MatchDay> findByNumber(Integer number);
 
+    Optional<MatchDay> getMatchDayById(Long matchDayId);
 }

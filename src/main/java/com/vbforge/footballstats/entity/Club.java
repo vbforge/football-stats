@@ -58,4 +58,10 @@ public class Club {
     @Column(name = "secondary_color")
     private String secondaryColor;
 
+    @OneToMany(mappedBy = "homeClub", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Game> homeGames;
+
+    @OneToMany(mappedBy = "awayClub", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Game> awayGames;
+
 }

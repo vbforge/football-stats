@@ -28,10 +28,7 @@ public class Action {
     @Column(nullable = false)
     private Integer assists = 0;
 
-    //probably better to have this functionality in the service
-    //calculate total points (1 point for goal, 1 point for assist)
     public Integer getTotalPoints(){
         return goals + assists;
     }
-
 }

@@ -5,11 +5,9 @@ import com.vbforge.footballstats.entity.*;
 import com.vbforge.footballstats.repository.*;
 import com.vbforge.footballstats.service.FootballStatsService;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -338,5 +336,10 @@ public class FootballStatsServiceImpl implements FootballStatsService {
     @Override
     public void savePlayer(Player player) {
         playerRepository.save(player);
+    }
+
+    @Override
+    public Optional<MatchDay> getMatchDayById(Long matchDayId) {
+        return matchDayRepository.getMatchDayById(matchDayId);
     }
 }

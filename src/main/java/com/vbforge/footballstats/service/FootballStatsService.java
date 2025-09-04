@@ -2,6 +2,7 @@ package com.vbforge.footballstats.service;
 
 import com.vbforge.footballstats.dto.*;
 import com.vbforge.footballstats.entity.Club;
+import com.vbforge.footballstats.entity.MatchDay;
 import com.vbforge.footballstats.entity.MatchResult;
 import com.vbforge.footballstats.entity.Player;
 import org.springframework.stereotype.Service;
@@ -33,4 +34,6 @@ public interface FootballStatsService {
     void updatePlayer(Player player);
     void deletePlayer(Long playerId);
     void savePlayer(Player player);
+
+    Optional<MatchDay> getMatchDayById(Long matchDayId);
 }

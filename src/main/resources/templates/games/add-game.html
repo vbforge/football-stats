@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Game - Football Stats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-futbol me-2"></i>Football Stats
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link active" href="/games/add">Add Game</a>
+            <a class="nav-link" href="/statistics">Statistics</a>
+            <a class="nav-link" href="/league">League Table</a>
+            <a class="nav-link" href="/games">Games</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Add Game</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/games/add-game}" th:object="${gameForm}" method="post">
+
+                        <!-- Match Day -->
+                        <div class="mb-3">
+                            <label class="form-label">Match Day Number:</label>
+                            <input type="number" class="form-control" th:field="*{matchDayNumber}" min="1" required>
+                        </div>
+
+                        <!-- Game Date -->
+                        <div class="mb-3">
+                            <label class="form-label">Game Date:</label>
+                            <input type="date" class="form-control" th:field="*{gameDate}" required>
+                        </div>
+
+                        <!-- Home Club -->
+                        <div class="mb-3">
+                            <label class="form-label">Home Club:</label>
+                            <select class="form-select" th:field="*{homeClub}" required>
+                                <option value="">Choose home club...</option>
+                                <option th:each="club : ${clubs}"
+                                        th:value="${club.name}"
+                                        th:text="${club.name}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Away Club -->
+                        <div class="mb-3">
+                            <label class="form-label">Away Club:</label>
+                            <select class="form-select" th:field="*{awayClub}" required>
+                                <option value="">Choose away club...</option>
+                                <option th:each="club : ${clubs}"
+                                        th:value="${club.name}"
+                                        th:text="${club.name}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Stadium -->
+                        <div class="mb-3">
+                            <label class="form-label">Stadium Name:</label>
+                            <input type="text" class="form-control" th:field="*{stadiumName}">
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <label class="form-label">Status:</label>
+                            <select class="form-select" th:field="*{status}">
+                                <option value="">Choose status...</option>
+                                <option value="SCHEDULED">Scheduled</option>
+                                <option value="FINISHED">Finished</option>
+                            </select>
+                        </div>
+
+                        <!-- Optional: Goals (for finished games) -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Home Goals:</label>
+                                    <input type="number" class="form-control" th:field="*{homeGoals}" min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Away Goals:</label>
+                                    <input type="number" class="form-control" th:field="*{awayGoals}" min="0" value="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-save me-2"></i>Save Game
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a href="/games" class="btn btn-outline-primary">
+                    <i class="fas fa-list me-2"></i>Back to Games
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

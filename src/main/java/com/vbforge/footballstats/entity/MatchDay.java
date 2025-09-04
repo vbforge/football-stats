@@ -16,10 +16,17 @@ public class MatchDay {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private Integer number;
 
     @OneToMany(mappedBy = "matchDay", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Action> actions;
+
+    @OneToMany(mappedBy = "matchDay", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Game> games;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "season_id", nullable = false)
+    private Season season;
 
 }

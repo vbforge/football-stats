@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${cityName} + ' - City Page'"></title>
+</head>
+<body>
+<h1 th:text="'Welcome to ' + ${cityName}"></h1>
+
+<!-- Back to map -->
+<p>
+    <a th:href="@{/cities/map}">⬅ Back to Map</a>
+</p>
+</body>
+</html>
