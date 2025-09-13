@@ -82,6 +82,31 @@ public class GameServiceImpl implements GameService {
         gameRepository.save(game);
     }
 
+    @Override
+    @Transactional
+    public Game updateGame(Game game) {
+        if (game == null || game.getId() == null) {
+            throw new IllegalArgumentException("Game and Game ID cannot be null");
+        }
+
+        Optional<Game> existingGameOpt = gameRepository.findById(game.getId());
+        if (existingGameOpt.isEmpty()) {
+            throw new RuntimeException("Game not found with ID: " + game.getId());
+        }
+
+        // Additional validation for finished games
+        if (game.getStatus() == Game.GameStatus.FINISHED) {
+            if (game.getHomeGoals() == null || game.getAwayGoals() == null) {
+                throw new IllegalArgumentException("Goals cannot be null for finished games");
+            }
+            if (game.getHomeGoals() < 0 || game.getAwayGoals() < 0) {
+                throw new IllegalArgumentException("Goals cannot be negative");
+            }
+        }
+
+        return gameRepository.save(game);
+    }
+
     // Calendar functionality
     @Override
     public List<Game> getGamesByClub(Club club) {

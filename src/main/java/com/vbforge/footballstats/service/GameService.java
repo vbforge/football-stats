@@ -15,6 +15,7 @@ public interface GameService {
     List<Game> getAllGames();
     Optional<Game> getGameById(Long id);
     void saveGame(GameFormDTO gameFormDTO);
+    Game updateGame(Game game);
 
     // Calendar functionality
     List<Game> getGamesByClub(Club club);
