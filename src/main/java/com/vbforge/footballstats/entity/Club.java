@@ -7,7 +7,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "clubs")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Club {
@@ -28,8 +29,10 @@ public class Club {
     @Column(name = "logo_path")
     private String logoPath;
 
-    @Column
-    private String city;
+    // Replace String city with City entity relationship
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id", referencedColumnName = "id")
+    private City city;
 
     @Column(name = "founded_year")
     private Integer foundedYear;
@@ -63,5 +66,10 @@ public class Club {
 
     @OneToMany(mappedBy = "awayClub", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Game> awayGames;
+
+    // Convenience method to get city name (for backward compatibility)
+    public String getCityName() {
+        return city != null ? city.getName() : null;
+    }
 
 }

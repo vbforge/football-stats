@@ -1,0 +1,57 @@
+.city-point {
+    cursor: pointer;
+    transition: transform 0.1s, fill 0.1s;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.city-point:hover {
+    transform: scale(1.5);
+    fill: #ff6b35;
+}
+
+/* Different colors based on city population/importance */
+.city-large { fill: #dc3545; stroke: white; stroke-width: 2; } /* Large cities (1M+) */
+.city-medium { fill: #28a745; stroke: white; stroke-width: 2; } /* Medium cities (500K-1M) */
+.city-small { fill: #007bff; stroke: white; stroke-width: 2; } /* Small cities (<500K) */
+
+.map-container {
+    background: linear-gradient(135deg, #ecedf4 0%, #848386 100%);
+    border-radius: 15px;
+    padding: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.map-legend {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 10px;
+    border: 2px solid white;
+}
+
+.stats-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.legend-color.city-large { background-color: #dc3545; }
+.legend-color.city-medium { background-color: #28a745; }
+.legend-color.city-small { background-color: #007bff; }

@@ -1,9 +1,13 @@
 package com.vbforge.footballstats.controller;
 
 import com.vbforge.footballstats.dto.ClubDetailDTO;
+import com.vbforge.footballstats.entity.City;
 import com.vbforge.footballstats.entity.Club;
 import com.vbforge.footballstats.entity.Player;
-import com.vbforge.footballstats.service.FootballStatsService;
+
+import com.vbforge.footballstats.service.CityService;
+import com.vbforge.footballstats.service.ClubService;
+import com.vbforge.footballstats.service.PlayerService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,18 +23,25 @@ import java.util.stream.Collectors;
 @RequestMapping("/clubs")
 public class ClubController {
 
-    private final FootballStatsService footballStatsService;
+    private final ClubService clubService;
+    private final PlayerService playerService;
+    private final CityService cityService;
 
-    public ClubController(FootballStatsService footballStatsService) {
-        this.footballStatsService = footballStatsService;
+    public ClubController(ClubService clubService, PlayerService playerService,
+                          CityService cityService) {
+        this.clubService = clubService;
+        this.playerService = playerService;
+        this.cityService = cityService;
     }
 
     // Club details
     @GetMapping("/{id}")
     public String viewClub(@PathVariable Long id, Model model) {
         try {
-            ClubDetailDTO club = footballStatsService.getClubDetail(id);
+            ClubDetailDTO club = clubService.getClubDetail(id);
             model.addAttribute("club", club);
+            City city = cityService.findCityByClubId(id).orElseThrow();
+            model.addAttribute("city", city.getName());
             return "club-detail";
         } catch (EntityNotFoundException e) {
             model.addAttribute("errorMessage", "Club not found");
@@ -42,7 +53,7 @@ public class ClubController {
     @GetMapping("/{id}/edit")
     public String editClubForm(@PathVariable Long id, Model model) {
         try {
-            Club club = footballStatsService.getClubById(id);
+            Club club = clubService.getClubById(id);
             model.addAttribute("club", club);
             return "club-edit";
         } catch (EntityNotFoundException e) {
@@ -64,7 +75,7 @@ public class ClubController {
 
         try {
             club.setId(id);
-            footballStatsService.updateClub(club);
+            clubService.updateClub(club);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Club " + club.getName() + " updated successfully");
             return "redirect:/clubs/" + id;
@@ -79,8 +90,8 @@ public class ClubController {
     @GetMapping("/{id}/squad")
     public String viewSquad(@PathVariable Long id, Model model) {
         try {
-            Club club = footballStatsService.getClubById(id);
-            List<Player> players = footballStatsService.getPlayersByClub(id);
+            Club club = clubService.getClubById(id);
+            List<Player> players = playerService.getPlayersByClub(id);
 
             // Group players by position
             Map<Player.Position, List<Player>> playersByPosition = players.stream()
@@ -104,8 +115,8 @@ public class ClubController {
     @GetMapping("/{id}/squad/manage")
     public String manageSquad(@PathVariable Long id, Model model) {
         try {
-            Club club = footballStatsService.getClubById(id);
-            List<Player> players = footballStatsService.getPlayersByClub(id);
+            Club club = clubService.getClubById(id);
+            List<Player> players = playerService.getPlayersByClub(id);
 
             // Calculate position counts
             Map<Player.Position, Long> positionCounts = players.stream()
@@ -129,7 +140,7 @@ public class ClubController {
     @GetMapping("/{id}/players/new")
     public String newPlayerForm(@PathVariable Long id, Model model) {
         try {
-            Club club = footballStatsService.getClubById(id);
+            Club club = clubService.getClubById(id);
             Player player = new Player();
             player.setClub(club);
 
@@ -155,9 +166,9 @@ public class ClubController {
         }
 
         try {
-            Club club = footballStatsService.getClubById(clubId);
+            Club club = clubService.getClubById(clubId);
             player.setClub(club);
-            footballStatsService.savePlayer(player);
+            playerService.savePlayer(player);
 
             redirectAttributes.addFlashAttribute("successMessage",
                     "Player " + player.getName() + " added successfully to " + club.getName());

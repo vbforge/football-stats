@@ -1,220 +1,446 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Football Statistics App</title>
+    <title th:text="'Premier League ' + ${seasonName}">Premier League Statistics</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/index_map.css">
+    <link rel="stylesheet" href="/css/index_navbar.css">
+    <link rel="stylesheet" href="/css/league_table.css">
+    <style>
+        .match-result, .match-schedule {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            background-color: #f8f9fa;
+        }
+
+        .score-container, .vs-container {
+            min-width: 60px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-dark shadow-sm">
     <div class="container">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-futbol me-2"></i>Football Stats
+        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="/">
+            <img src="/images/logos/pl-logo-dark.svg" alt="Football Stats Logo" class="me-2">
+            <span th:text="${seasonName}">Premier League</span>
         </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/">Add Action</a>
-            <a class="nav-link" href="/statistics">Statistics</a>
-            <a class="nav-link" href="/games">Games</a>
-            <a class="nav-link" href="/match-result">Match Results</a>
-            <a class="nav-link" href="/league">League Table</a>
-            <a class="nav-link" href="/cities/map">Map</a>
+            <a class="nav-link" href="/action"><i class="fas fa-plus me-1"></i>Player Action</a>
+            <a class="nav-link" href="/players/statistics"><i class="fas fa-chart-bar me-1"></i>Players Statistics</a>
+            <a class="nav-link" href="/games"><i class="fas fa-futbol me-1"></i>Games Management</a>
+            <a class="nav-link" href="/games/add"><i class="fas fa-plus me-1"></i>Game</a>
+            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League Table</a>
+            <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>
         </div>
     </div>
 </nav>
 
 <div class="container mt-4">
-    <!-- Alert Messages -->
-    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
-        <span th:text="${success}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+    <div class="row align-items-stretch">
 
-    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-circle me-2"></i>
-        <span th:text="${error}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-
-    <div class="row">
-        <!-- Add Action Form -->
+        <!-- Left column1 -->
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Add Player Action</h5>
+            <div class="card h-100">
+
+                <!-- Map -->
+                <br>
+                <div class="map-container">
+                    <div class="map-card">
+                        <h2 class="card-title text-center mb-3">
+                            <i class="fas fa-map-marked-alt me-1"></i>Premier League Cities Map
+                        </h2>
+                        <svg class="map-svg" viewBox="0 -5 200 300" xmlns="http://www.w3.org/2000/svg">
+                            <g fill="#1971BC">
+                                <path d="m14.5 282.13s9.75 0.75 9.25 6.75 4.25-2.75 5.25-6.5 6 0 6 0 2-3.75 2.25-4.5 20.5 9.75 21.5 10 8.25-15 8.25-15 28.25 8.5 29.5 8.25 0.75-4.5 0.75-4.5l14.25 0.75-1.5-6 12.5 9 14.5-1 7.25 4.75 14-6 1.5 2 4-4.5 7-0.75 2-10.5-11.5 1.75-1.5-6s-8-0.25-7.5-1 10.5-0.75 10.5-0.75l3-5.75s-4.25-1.25-4.5-1.5 7.25 0 7.25 0l3.5-2.25-2.75-3.75 5 1.25s14.75-14 11-23.5-17.5-14.5-23.75-14-5.083 5.751-5.083 5.751-4.167-0.5-5.5-4 1-3.166 5.5-4.833-0.501-12.167-2.667-16.167 0.168-2.667 2.334-3.667-2.501-7.834-4.834-12 1.125-4.584 3-6.334-3.5-5.25-6.125-7.375-3.625-11.625-12.5-12-5-28.75-3.75-33.125-4.625-0.5-7.625-12.333-8.333-7.5-11.167-7.833-11 3.167-12.333-0.167 5-2.667 7.333-2.333 1.5-1 2.667-2.833 8.333 6 8-0.333-4.167-6-4.167-6l1.833-2.167s18.833-17 19-24.167 5.833-4.167 5.833-9.167-18.667-8.167-21.667-7.667-6.833-4.167-9-2.667-6 4-7.333 3.167-8.333 1.333-8.167-1 3.333-5.166 4.833-3.833 3.167 0.5 3.167 0.5 3-2.667 3.333-3.5-2.333-1-3.667-1-1.667-0.833-1.167-1.333 19.5-13.333 20-14.167 3.666-5 3.833-7.5-23.5-3.5-23.833-2.167-2.5 3.5-2.5 3.5-0.333-2.833-1-4.667-6.5-8.167-7.5-4.167-1.667 6.5-2.667 6.5-7 2.333 1.667 6-1.167 3.667-4.333 1-3.667-3.333-3 0.333l0.167 3.833-3.667-2.5s-2.375 2.417 0.375 4.667 3 1.875 1.375 3-2.25 0.25-4.25-1.875-2.625 1.875-1.5 4.25-1.125 1.375-2 0-2.25-4.25-3.25-2.375 1.25 8.25 3.25 10.75 0.875 10.5 0.625 10.875-6.25-1.125-5.625 0.875 6.625 3.375 4.625 5.125-4.5 2.125-6.375 0.125-7.125 1.5-4 5.125 1.125 3.75-1.375 2.625-6.125-2.25-5.875 0.25 0.375 2.875 0.375 2.875-4.25-0.5-3.375 1.5 4.5 0.75 5.25 2.375-1.375 4.875-3.625 5-6.875-0.625-4.25 2.25 11.375 1.125 13.5-2 2.875-4.125 3.5-4.625 3.125-2.375 3.125-2.375l3.783-2.133 0.5 2-5.5 3.75-1.75 3.75-3.625 3.5c0.25 2.5-0.5 8-0.5 8l-5.375 3.25s3.375 0.375 4.5-0.375-3.625 4-3.625 4l2.25 2.25s-4.25 2.25-4.75 6.25-3.5 7.25-4.25 7.75-1.25 3 1 3.125 5-1.5 5-1.5l1.5-4.375 0.875-2.625 1.375-4.625 3.25-2.125 0.375-4-1-3.25 10.875-6.5s-0.375 5.75 0.75 8.375 5.5 3.375 5.5 3.375l-6.75-0.875s-2.375 6.875-2.375 7.5 3.5 7.25 3.5 7.25l-5.5 5.625-5.25 7.5-0.5 4.375s-3.125 0.5-3.5 0.625 5.75 4.875 5.75 4.875l1.625-2.125 5.625 8.25 2-2.625s-0.375-5.25-0.375-5.5 5.5 6.875 5.5 6.875l3.75-0.75s4.5-4.25 6.25-2.25 3.875-2.12 3.875-2.12l3.25 1.125 3.625 0.125-0.75 1.75s-6-1-6.625 1.25-6.625 9.5-6.625 9.5 1.875 2.25 3 5.75-0.625 5.875-0.625 5.875l1.375 1.25 2.5-1.25-0.25 4.625v0.625l2.875 0.875 3.875-4.5 0.875 2.5-2.875 3.75 1.125 1.75-0.625 1.75-4.875-0.75-1 3.625 3.5 2.625-0.125 1.75-5 3.625 0.75 4.25 6.5 4.625-2.25 2.5-4.625-6.1-2 1.875 1.875 2.875-2.125 2.375-1.625-4.5s-3.875-1.875-5-0.25-3.125 2.125-4.25 0.75-2.5-3.25-2.5-3.25-2.125 2.125-2.25 2.5-4.375 0.25-4.375 0.25l1.5-3.25-6-6.375-3.75 3.5 3.625 7.25-4.75 5.75s-4.875 3.125-4.875 2.625 2 4.625 2 4.625l6.875-5 4 5.125 0.125 9.5-11.5 10-5.5-0.625-3.75 4.625-10.125-1.625-0.875 9.125 2.5 1.375 2.375 4.125 5.5 0.375 3-3.375 5.625 0.125 0.875 8.375 4.125-0.375 2.125-2 2.875 0.875 2.125 6.75 5 4.25 4.125-0.63 4.625-4.875 3.25 0.75 2.375 1.25-5.25 4.25-1.875 4.25s0.25 0.625-0.125 0.625-6.5 1.375-6.5 1.375l-8.5-5.375s-8.5 0.5-8.75 0.125-3.875 6.375-3.875 6.375h-3l-1.75-3.25-3.25 3.125 1.5 5-7.75 5.75s-1.875-0.75-2.375-0.75-2.25 3.875-2.25 3.875-4.125 2.125-4 1.875-1.375 3.625-1.375 3.625l-9.125 0.11-3.75 0.5 0.25 3.5z"/>
+                            </g>
+                            <th:block th:each="city : ${cities}">
+                                <a th:href="@{/cities/{name}(name=${city.name})}">
+                                    <circle class="city-point"
+                                            th:attr="cx=${city.x}, cy=${city.y}" r="5">
+                                        <title th:text="${city.name}"></title>
+                                    </circle>
+                                </a>
+                            </th:block>
+                        </svg>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form th:action="@{/add-action}" th:object="${actionForm}" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Match Day Number:</label>
-                            <input type="number" class="form-control" th:field="*{matchDayNumber}"
-                                   min="1" required>
+
+                <!-- Top Goal Scorers -->
+                <br>
+                <br>
+                <div class="container">
+                    <div class="card">
+
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0"><i class="fas fa-crown me-2"></i>Top Goal Scorers</h4>
                         </div>
-
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox"
-                                       id="newPlayerCheck" th:field="*{newPlayer}">
-                                <label class="form-check-label" for="newPlayerCheck">
-                                    Add New Player
-                                </label>
+                        <div class="card-body">
+                            <div th:if="${#lists.isEmpty(topScorers)}" class="text-center text-muted">
+                                <i class="fas fa-futbol fa-2x mb-2"></i>
+                                <p>No goals scored yet</p>
                             </div>
-                        </div>
-
-                        <!-- Existing Player Selection -->
-                        <div id="existingPlayerSection">
-                            <div class="mb-3">
-                                <label class="form-label">Select Club:</label>
-                                <select class="form-select" id="clubSelect">
-                                    <option value="">Choose club...</option>
-                                    <option th:each="club : ${clubs}"
-                                            th:value="${club.id}"
-                                            th:text="${club.name}"></option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Select Player:</label>
-                                <select class="form-select" th:field="*{playerId}" id="playerSelect">
-                                    <option value="">Choose player...</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- New Player Section -->
-                        <div id="newPlayerSection" style="display: none;">
-                            <div class="mb-3">
-                                <label class="form-label">Player Name:</label>
-                                <input type="text" class="form-control" th:field="*{playerName}">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Club Name:</label>
-                                <input type="text" class="form-control" th:field="*{clubName}">
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Goals:</label>
-                                    <input type="number" class="form-control" th:field="*{goals}"
-                                           min="0" value="0">
+                            <div th:each="stat : ${topScorers}"
+                                 class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong th:text="${stat.playerName}"></strong>
+                                    <small class="text-muted" th:text="' (' + ${stat.clubName} + ')'"></small>
                                 </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="mb-3">
-                                    <label class="form-label">Assists:</label>
-                                    <input type="number" class="form-control" th:field="*{assists}"
-                                           min="0" value="0">
-                                </div>
+                                <span class="badge bg-success" th:text="${stat.totalGoals}"></span>
                             </div>
                         </div>
-
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="fas fa-save me-2"></i>Add Action
-                        </button>
-                    </form>
+                    </div>
                 </div>
+
+                <!-- Top Assist Providers -->
+                <br>
+<!--                <br>-->
+                <div class="container">
+                    <div class="card">
+
+                        <div class="card-header bg-info text-white">
+                            <h4 class="mb-0"><i class="fas fa-hands-helping me-2"></i>Top Assist Providers</h4>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${#lists.isEmpty(topAssistProviders)}" class="text-center text-muted">
+                                <i class="fas fa-hands-helping fa-2x mb-2"></i>
+                                <p>No assists made yet</p>
+                            </div>
+                            <div th:each="stat : ${topAssistProviders}"
+                                 class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <strong th:text="${stat.playerName}"></strong>
+                                    <small class="text-muted" th:text="' (' + ${stat.clubName} + ')'"></small>
+                                </div>
+                                <span class="badge bg-info" th:text="${stat.totalAssists}"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+
             </div>
         </div>
 
-        <!-- Quick Stats -->
+        <!-- Right column1 -->
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="/statistics" class="btn btn-outline-primary">
-                            <i class="fas fa-trophy me-2"></i>View All Statistics
-                        </a>
-                        <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#clubStatsModal">
-                            <i class="fas fa-users me-2"></i>Club Statistics
-                        </button>
-                    </div>
+            <div class="card h-100">
 
-                    <hr>
+                <!-- League Table -->
+                <div class="container">
+                    <div class="card-body p-0">
+                        <br>
+                        <h2 class="card-title text-center mb-3">
+                            <i class="fas fa-trophy me-xl-1"></i>
+                            Premier League Table
+                        </h2>
+                        <div class="table-responsive">
+                            <table class="table table-hover league-table mb-0">
+                                <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center" style="width: 40px;">Pos</th>
+                                    <th>Club</th>
+                                    <th class="text-center" style="width: 40px;">MP</th>
+                                    <th class="text-center" style="width: 40px;">W</th>
+                                    <th class="text-center" style="width: 40px;">D</th>
+                                    <th class="text-center" style="width: 40px;">L</th>
+                                    <th class="text-center" style="width: 40px;">GF</th>
+                                    <th class="text-center" style="width: 40px;">GA</th>
+                                    <th class="text-center" style="width: 40px;">GD</th>
+                                    <th class="text-center" style="width: 50px;">Pts</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="club, iterStat : ${standings}">
+                                    <td class="text-center">
+                                        <div class="position-badge"
+                                             th:classappend="${iterStat.index < 4} ? 'champions-league' :
+                                                           (${iterStat.index == 4} ? 'europa-league' :
+                                                           (${iterStat.index < 10} ? 'top-half' :
+                                                           (${iterStat.index < 17} ? 'bottom-half' : 'relegation')))">
+                                            <span th:text="${iterStat.index + 1}"></span>
+                                        </div>
+                                    </td>
+                                    <td class="fw-semibold">
+                                        <a th:href="@{'/clubs/' + ${club.clubId}}"
+                                           class="text-decoration-none text-dark d-flex align-items-center club-link">
+                                            <img th:src="${club.logoPath}"
+                                                 th:alt="${club.clubName + ' logo'}"
+                                                 class="club-logo me-2"
+                                                 style="width: 20px; height: 20px;"
+                                                 onerror="this.classList.add('error');">
+                                            <div class="club-logo-fallback me-2">
+                                                <i class="fas fa-shield-alt"></i>
+                                            </div>
+                                            <div class="club-name-container">
+                                                <span class="club-name" th:text="${club.clubName}"></span>
+                                            </div>
+                                        </a>
+                                    </td>
+                                    <td class="text-center" th:text="${club.matchesPlayed}"></td>
+                                    <td class="text-center text-success fw-bold" th:text="${club.wins}"></td>
+                                    <td class="text-center text-warning fw-bold" th:text="${club.draws}"></td>
+                                    <td class="text-center text-danger fw-bold" th:text="${club.defeats}"></td>
+                                    <td class="text-center" th:text="${club.goalsFor}"></td>
+                                    <td class="text-center" th:text="${club.goalsAgainst}"></td>
+                                    <td class="text-center fw-bold"
+                                        th:text="${club.goalDifference}"
+                                        th:classappend="${club.goalDifference > 0} ? 'text-success' :
+                                                      (${club.goalDifference < 0} ? 'text-danger' : 'text-muted')"></td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary fs-6" th:text="${club.totalPoints}"></span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-                    <h6>Recent Actions</h6>
-                    <div class="text-muted">
-                        <small>Use the form to add goals and assists for players.
-                            You can add new players or select existing ones.</small>
+                        <br>
+                        <!-- Legend -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5>Legend:</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <small>
+                                                    <span class="badge champions-league me-2">1-4</span>Champions League (Group stage)
+                                                    <br>
+                                                    <span class="badge europa-league me-2">5</span>Europa League (Group stage)
+                                                    <br>
+                                                    <span class="badge top-half me-2">6-10</span>Top Half
+                                                    <br>
+                                                    <span class="badge bottom-half me-2">11-17</span>Bottom Half
+                                                    <br>
+                                                    <span class="badge relegation me-2">18-20</span>Relegation Zone
+                                                </small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <small>
+                                                    <span>MP: Matches Played</span>
+                                                    <br>
+                                                    <span>W: Won, D: Draw, L: Lost</span>
+                                                    <br>
+                                                    <span>GF: Goals For, GA: Goals Against</span>
+                                                    <br>
+                                                    <span>GD: Goal Difference</span>
+                                                    <br>
+                                                    <span>Pts: Points</span>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
                     </div>
                 </div>
+
+
             </div>
         </div>
+
+        <!-- Left column2 -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <br>
+                <!-- Previous Match Day Results -->
+                <div class="container">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">
+                                <i class="fas fa-history me-2"></i>Previous Match Day Results
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${lastMatchDayResults == null or #lists.isEmpty(lastMatchDayResults)}"
+                                 class="text-center text-muted">
+                                <i class="fas fa-clock fa-2x mb-2"></i>
+                                <p>No recent match results</p>
+                            </div>
+
+                            <div th:unless="${lastMatchDayResults == null or #lists.isEmpty(lastMatchDayResults)}">
+                                <!-- Match Day header -->
+                                <div class="mb-2 text-center">
+                                    <small class="text-muted">Match Day <span th:text="${lastMatchDay?.number}">0</span></small>
+                                </div>
+
+                                <!-- Matches -->
+                                <div th:each="game : ${lastMatchDayResults}" class="match-result mb-4">
+
+                                    <div class="text-center mb-2">
+                                        <!-- date (left) + stadium (right) -->
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-muted fw-bold"
+                                                   th:text="${#temporals.format(game.gameDate, 'dd/MM/yyyy')}"></small>
+
+                                            <small class="text-muted text-end">
+                                                <i class="fas fa-map-marker-alt me-1 text-primary"></i>
+                                                <span th:text="${game.stadiumName}"></span>
+                                            </small>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Row for teams + score -->
+                                    <div class="row align-items-center text-center">
+                                        <!-- Column: team logos + names -->
+                                        <div class="col-10">
+                                            <div class="d-flex align-items-center justify-content-start mb-1">
+                                                <img th:src="${game.homeClub.logoPath}"
+                                                     th:alt="${game.homeClub.name + ' logo'}"
+                                                     class="me-2"
+                                                     style="width: 28px; height: 28px; object-fit: contain;"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                                                <i class="fas fa-shield-alt text-muted"
+                                                   style="width: 28px; height: 28px; display: none;"></i>
+                                                <span th:text="${game.homeClub.name}" class="fw-bold"></span>
+                                            </div>
+                                            <div class="d-flex align-items-center justify-content-start">
+                                                <img th:src="${game.awayClub.logoPath}"
+                                                     th:alt="${game.awayClub.name + ' logo'}"
+                                                     class="me-2"
+                                                     style="width: 28px; height: 28px; object-fit: contain;"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                                                <i class="fas fa-shield-alt text-muted"
+                                                   style="width: 28px; height: 28px; display: none;"></i>
+                                                <span th:text="${game.awayClub.name}" class="fw-bold"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Column: score (always centered vertically) -->
+                                        <div class="col-2">
+                            <span class="badge bg-secondary fs-6 px-3 py-2 d-block"
+                                  th:text="${game.homeGoals} + ' - ' + ${game.awayGoals}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- View all link -->
+                                <div class="text-center mt-3">
+                                    <a th:href="@{/games/match-day/{id}(id=${lastMatchDay?.id})}"
+                                       class="btn btn-sm btn-outline-warning">
+                                        View All Match Day <span th:text="${lastMatchDay?.number}">0</span> Results
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+                <br>
+            </div>
+        </div>
+
+        <!-- Right column2 -->
+        <div class="col-md-6">
+            <div class="card h-100">
+                <br>
+                <!-- Next Match Day Schedule -->
+                <div class="container">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-calendar-alt me-2"></i>Next Scheduled Match Day
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${nextMatchDaySchedule == null or #lists.isEmpty(nextMatchDaySchedule)}"
+                                 class="text-center text-muted">
+                                <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                                <p>No upcoming matches scheduled</p>
+                            </div>
+
+                            <div th:unless="${nextMatchDaySchedule == null or #lists.isEmpty(nextMatchDaySchedule)}">
+                                <!-- Match Day header -->
+                                <div class="mb-2 text-center">
+                                    <small class="text-muted">Match Day <span th:text="${nextMatchDay?.number}">0</span></small>
+                                </div>
+
+                                <!-- Matches -->
+                                <div th:each="game : ${nextMatchDaySchedule}" class="match-schedule mb-4">
+
+                                    <div class="text-center mb-2">
+                                        <!-- date (left) + stadium (right) -->
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-muted fw-bold"
+                                                   th:text="${#temporals.format(game.gameDate, 'dd/MM/yyyy')}"></small>
+
+                                            <small class="text-muted text-end">
+                                                <i class="fas fa-map-marker-alt me-1 text-primary"></i>
+                                                <span th:text="${game.stadiumName}"></span>
+                                            </small>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Row for teams-->
+                                    <div class="row align-items-center text-center">
+                                        <!-- Column: team logos + names -->
+                                        <div class="col-10">
+                                            <div class="d-flex align-items-center justify-content-start mb-1">
+                                                <img th:src="${game.homeClub.logoPath}"
+                                                     th:alt="${game.homeClub.name + ' logo'}"
+                                                     class="me-2"
+                                                     style="width: 28px; height: 28px; object-fit: contain;"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                                                <i class="fas fa-shield-alt text-muted"
+                                                   style="width: 28px; height: 28px; display: none;"></i>
+                                                <span th:text="${game.homeClub.name}" class="fw-bold"></span>
+                                            </div>
+                                            <div class="d-flex align-items-center justify-content-start">
+                                                <img th:src="${game.awayClub.logoPath}"
+                                                     th:alt="${game.awayClub.name + ' logo'}"
+                                                     class="me-2"
+                                                     style="width: 28px; height: 28px; object-fit: contain;"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                                                <i class="fas fa-shield-alt text-muted"
+                                                   style="width: 28px; height: 28px; display: none;"></i>
+                                                <span th:text="${game.awayClub.name}" class="fw-bold"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- View all match day schedule button link -->
+                                <div class="text-center mt-3">
+                                    <a th:href="@{/games/match-day/{id}(id=${nextMatchDay?.id})}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View All Match Day <span th:text="${nextMatchDay?.number}">0</span> Schedule
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+            </div>
+        </div>
+
+
+
+
     </div>
 </div>
 
-<!-- Club Stats Modal -->
-<div class="modal fade" id="clubStatsModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Club Statistics</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="list-group">
-                    <a th:each="club : ${clubs}"
-                       th:href="@{/statistics/club/{id}(id=${club.id})}"
-                       class="list-group-item list-group-item-action">
-                        <i class="fas fa-shield-alt me-2"></i>
-                        <span th:text="${club.name}"></span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Toggle between new player and existing player sections
-    document.getElementById('newPlayerCheck').addEventListener('change', function() {
-        const existingSection = document.getElementById('existingPlayerSection');
-        const newSection = document.getElementById('newPlayerSection');
-
-        if (this.checked) {
-            existingSection.style.display = 'none';
-            newSection.style.display = 'block';
-            // Clear existing player selection
-            document.getElementById('playerSelect').value = '';
-        } else {
-            existingSection.style.display = 'block';
-            newSection.style.display = 'none';
-            // Clear new player fields
-            document.querySelector('input[name="playerName"]').value = '';
-            document.querySelector('input[name="clubName"]').value = '';
-        }
-    });
-
-    // Load players when club is selected
-    document.getElementById('clubSelect').addEventListener('change', function() {
-        const clubId = this.value;
-        const playerSelect = document.getElementById('playerSelect');
-
-        // Clear previous options
-        playerSelect.innerHTML = '<option value="">Choose player...</option>';
-
-        if (clubId) {
-            fetch(`/api/players/club/${clubId}`)
-                .then(response => response.json())
-                .then(players => {
-                    players.forEach(player => {
-                        const option = document.createElement('option');
-                        option.value = player.id;
-                        option.textContent = player.name;
-                        playerSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error loading players:', error));
-        }
-    });
-</script>
+<br>
+<br>
 </body>
 </html>
+
+
+
+
+
+

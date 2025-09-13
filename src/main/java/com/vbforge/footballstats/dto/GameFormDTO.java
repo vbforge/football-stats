@@ -1,5 +1,6 @@
 package com.vbforge.footballstats.dto;
 
+import com.vbforge.footballstats.entity.Season;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ public class GameFormDTO {
     private String homeClub;
     private String awayClub;
     private Integer matchDayNumber;
+    private String seasonName;
     private LocalDate gameDate;
     private Integer homeGoals;
     private Integer awayGoals;

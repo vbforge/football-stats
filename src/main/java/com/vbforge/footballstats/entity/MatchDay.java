@@ -7,7 +7,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "match_days")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class MatchDay {

@@ -121,8 +121,8 @@
                         <span th:if="${club.nickname}" class="badge info-badge">
                             <i class="fas fa-star me-1"></i><span th:text="${club.nickname}"></span>
                         </span>
-                    <span th:if="${club.city}" class="badge info-badge">
-                            <i class="fas fa-map-marker-alt me-1"></i><span th:text="${club.city}"></span>
+                    <span th:if="${city}" class="badge info-badge">
+                            <i class="fas fa-map-marker-alt me-1"></i><span th:text="${city}"></span>
                         </span>
                     <span th:if="${club.foundedYear}" class="badge info-badge">
                             <i class="fas fa-calendar me-1"></i>Founded <span th:text="${club.foundedYear}"></span>

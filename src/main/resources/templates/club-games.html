@@ -7,13 +7,13 @@
         Stats</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/index_navbar.css">
     <style>
         .club-header {
             background: linear-gradient(135deg, var(--primary-color, #007bff) 0%, var(--secondary-color, #0056b3) 100%);
             color: white;
             padding: 2rem 0;
         }
-
         .club-logo-large {
             width: 80px;
             height: 80px;
@@ -23,95 +23,39 @@
             padding: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-
-        .stat-card {
-            border: none;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease;
-            height: 100%;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .position-circle {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin: 0 auto 1rem auto;
-        }
-
-        .position-1-4 {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-        }
-
-        .position-5 {
-            background: linear-gradient(135deg, #17a2b8, #20c997);
-            color: white;
-        }
-
-        .position-6-10 {
-            background: linear-gradient(135deg, #6c757d, #495057);
-            color: white;
-        }
-
-        .position-11-17 {
-            background: linear-gradient(135deg, #ffc107, #fd7e14);
-            color: black;
-        }
-
-        .position-18-20 {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-            color: white;
-        }
-
-        .player-card {
-            border: none;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.2s ease;
-        }
-
-        .player-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .stadium-image {
-            width: 100%;
-            height: 550px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
         .info-badge {
             background: rgba(255, 255, 255, 0.2);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(10px);
         }
+        .result-win {
+            background-color: #28a745 !important;
+        }
+        .result-lose {
+            background-color: #dc3545 !important;
+        }
+        .result-draw {
+            background-color: #6c757d !important;
+        }
     </style>
 </head>
 <body>
 
-<!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-dark shadow-sm">
     <div class="container">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-futbol me-2"></i>Football Stats
+        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="/">
+            <img src="/images/logos/pl-logo-dark.svg" alt="Football Stats Logo" class="me-2">
+            <span th:text="${seasonName}">Premier League</span>
         </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/">Add Action</a>
-            <a class="nav-link" href="/statistics">Statistics</a>
-            <a class="nav-link" href="/match-result">Add Match Result</a>
-            <a class="nav-link" href="/league">League Table</a>
+            <a class="nav-link" href="/action"><i class="fas fa-plus me-1"></i>Player Action</a>
+            <a class="nav-link" href="/players/statistics"><i class="fas fa-chart-bar me-1"></i>Players Statistics</a>
+            <a class="nav-link" href="/games"><i class="fas fa-futbol me-1"></i>Games Management</a>
+            <a class="nav-link" href="/games/add"><i class="fas fa-plus me-1"></i>Game</a>
+            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League Table</a>
+            <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>
         </div>
     </div>
 </nav>
@@ -136,8 +80,8 @@
                         <span th:if="${club.nickname}" class="badge info-badge">
                             <i class="fas fa-star me-1"></i><span th:text="${club.nickname}"></span>
                         </span>
-                    <span th:if="${club.city}" class="badge info-badge">
-                            <i class="fas fa-map-marker-alt me-1"></i><span th:text="${club.city}"></span>
+                    <span th:if="${city}" class="badge info-badge">
+                            <i class="fas fa-map-marker-alt me-1"></i><span th:text="${city}"></span>
                         </span>
                     <span th:if="${club.foundedYear}" class="badge info-badge">
                             <i class="fas fa-calendar me-1"></i>Founded <span th:text="${club.foundedYear}"></span>
@@ -160,17 +104,17 @@
 </div>
 
 <div class="container mt-4">
-    <!-- Games Table  -->
+    <!-- Games Table -->
     <div class="card">
         <div class="card-header">
-            <h5>Games</h5>
+            <h5>Games <span th:if="${club != null}" th:text="'for ' + ${club.name}"></span></h5>
         </div>
         <div class="card-body">
-            <div th:if="${games.empty}" class="text-center text-muted">
+            <div th:if="${games == null or games.empty}" class="text-center text-muted">
                 <p>No games found for this club.</p>
             </div>
 
-            <div th:unless="${games.empty}">
+            <div th:unless="${games == null or games.empty}">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="table-dark">
@@ -186,42 +130,49 @@
                         </thead>
                         <tbody>
                         <tr th:each="game : ${games}">
+                            <!-- Date -->
                             <td th:text="${#temporals.format(game.gameDate, 'dd/MM/yyyy')}"></td>
+                            <!-- Home Team -->
                             <td>
-                                <strong th:text="${game.homeClub.name}"
-                                        th:class="${game.homeClub.id == club.id} ? 'text-primary' : ''"></strong>
+                                <strong th:text="${game.homeClub?.name ?: 'Unknown'}"
+                                        th:class="${club != null and game.homeClub != null and game.homeClub.id == club.id} ? 'text-primary' : ''"></strong>
                             </td>
+                            <!-- Away Team -->
                             <td>
-                                <strong th:text="${game.awayClub.name}"
-                                        th:class="${game.awayClub.id == club.id} ? 'text-primary' : ''"></strong>
+                                <strong th:text="${game.awayClub?.name ?: 'Unknown'}"
+                                        th:class="${club != null and game.awayClub != null and game.awayClub.id == club.id} ? 'text-primary' : ''"></strong>
                             </td>
-                            <!--                            <td>-->
-                            <!--                                        <span th:if="${game.finished}"-->
-                            <!--                                              th:text="${game.result}"-->
-                            <!--                                              class="badge bg-secondary"></span>-->
-                            <!--                                <span th:unless="${game.finished}"-->
-                            <!--                                      class="text-muted">vs</span>-->
-                            <!--                            </td>-->
+                            <!-- Result -->
                             <td>
-                                <span th:if="${game.finished}"
-                                      th:text="${game.result}"
-                                      th:classappend="${game.getResultForTeam(cu) == 'win'} ? ' badge bg-success' :
-                                          (${game.getResultForTeam(club.getName()) == 'lose'} ? ' badge bg-danger' : ' badge bg-secondary')">
+                                <span th:if="${game.finished}">
+                                    <span th:if="${club != null}"
+                                          th:with="result=${game.getResultForTeam(club)}"
+                                          th:text="${game.result}"
+                                          th:class="'badge ' +
+                                              ${result == 'win' ? 'result-win' :
+                                               (result == 'lose' ? 'result-lose' : 'result-draw')}">
+                                    </span>
+                                    <span th:unless="${club != null}"
+                                          th:text="${game.result}"
+                                          class="badge bg-secondary">
+                                    </span>
                                 </span>
-                                <span th:unless="${game.finished}"
-                                      class="text-muted">vs</span>
+                                <span th:unless="${game.finished}" class="text-muted">vs</span>
                             </td>
+                            <!-- Status -->
                             <td>
-                                        <span th:if="${game.finished}"
-                                              class="badge bg-success">Finished</span>
-                                <span th:unless="${game.finished}"
-                                      class="badge bg-info">Scheduled</span>
+                                <span th:if="${game.finished}" class="badge bg-success">Finished</span>
+                                <span th:unless="${game.finished}" class="badge bg-info">Scheduled</span>
                             </td>
+                            <!-- Stadium -->
                             <td th:text="${game.stadiumName ?: '-'}"></td>
+                            <!-- Match Day -->
                             <td>
-                                <a th:href="@{/games/matchday/{id}(id=${game.matchDay.id})}"
+                                <a th:if="${game.matchDay != null}"
+                                   th:href="@{/games/matchday/{id}(id=${game.matchDay.id})}"
                                    th:text="${game.matchDay.number}"
                                    class="btn btn-sm btn-outline-primary"></a>
+                                <span th:unless="${game.matchDay != null}" class="text-muted">-</span>
                             </td>
                         </tr>
                         </tbody>

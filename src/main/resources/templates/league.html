@@ -3,96 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>League Table - Football Stats</title>
+    <title th:text="'Premier League ' + ${seasonName}">Premier League Statistics</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .league-table {
-            font-size: 0.95rem;
-        }
-        .position-badge {
-            min-width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-        .champions-league { background-color: #28a745; color: white; }
-        .europa-league { background-color: #17a2b8; color: white; }
-        .top-half { background-color: #6c757d; color: white; }
-        .bottom-half { background-color: #ffc107; color: black; }
-        .relegation { background-color: #dc3545; color: white; }
+    <link rel="stylesheet" href="/css/index_map.css">
+    <link rel="stylesheet" href="/css/index_navbar.css">
+    <link rel="stylesheet" href="/css/league_table.css">
 
-        .club-logo {
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
-            border-radius: 2px;
-            transition: transform 0.2s ease;
-            flex-shrink: 0;
-        }
-
-        .club-logo:hover {
-            transform: scale(1.1);
-        }
-
-        /* Fallback for missing logos */
-        .club-logo.error {
-            display: none;
-        }
-
-        .club-logo-fallback {
-            display: none;
-            width: 24px;
-            height: 24px;
-            align-items: center;
-            justify-content: center;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 50%;
-            color: #6c757d;
-            font-size: 12px;
-        }
-
-        .club-logo.error + .club-logo-fallback {
-            display: flex;
-        }
-
-        .club-name-container {
-            min-width: 0;
-            flex: 1;
-        }
-
-        .club-link {
-            transition: all 0.2s ease;
-        }
-
-        .club-link:hover {
-            background-color: rgba(0, 123, 255, 0.1);
-            border-radius: 4px;
-            padding: 4px;
-            margin: -4px;
-        }
-
-        .club-link:hover .club-name {
-            color: #007bff !important;
-        }
-    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+
+<nav class="navbar navbar-expand-lg navbar-light bg-dark shadow-sm">
     <div class="container">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-futbol me-2"></i>Football Stats
+        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="/">
+            <img src="/images/logos/pl-logo-dark.svg" alt="Football Stats Logo" class="me-2">
+            <span th:text="${seasonName}">Premier League</span>
         </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/">Add Action</a>
-            <a class="nav-link" href="/statistics">Statistics</a>
-            <a class="nav-link" href="/games">Games</a>
-            <a class="nav-link" href="/match-result">Match Results</a>
-            <a class="nav-link" href="/league">League Table</a>
-            <a class="nav-link" href="/cities/map">Map</a>
+            <a class="nav-link" href="/action"><i class="fas fa-plus me-1"></i>Player Action</a>
+            <a class="nav-link" href="/players/statistics"><i class="fas fa-chart-bar me-1"></i>Players Statistics</a>
+            <a class="nav-link" href="/games"><i class="fas fa-futbol me-1"></i>Games Management</a>
+            <a class="nav-link" href="/games/add"><i class="fas fa-plus me-1"></i>Game</a>
+            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League Table</a>
+            <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>
         </div>
     </div>
 </nav>
@@ -100,13 +33,26 @@
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col-md-8">
-            <h2><i class="fas fa-table me-2"></i>League Table</h2>
-            <p class="text-muted">Current standings based on match results</p>
+            <h3><strong><i class="fas fa-table me-2"></i>Premier League <span th:text="${seasonName} + ' Table'"></span></strong></h3>
+        </div>
+        <!-- Season Selector -->
+        <div class="card mb-4" th:if="${allSeasons}">
+            <div class="card-body">
+                <h6 class="card-title">View Different Season</h6>
+                <div class="btn-group" role="group">
+                    <a href="/league" class="btn btn-outline-primary"
+                       th:classappend="${selectedSeason == null} ? 'active' : ''">Current Season</a>
+                    <a th:each="season : ${allSeasons}"
+                       th:href="@{/league/season/{id}(id=${season.id})}"
+                       th:text="${season.name}"
+                       class="btn btn-outline-secondary"
+                       th:classappend="${selectedSeason != null && selectedSeason.id == season.id} ? 'active' : ''">Season</a>
+                </div>
+            </div>
         </div>
         <div class="col-md-4 text-end">
-            <a href="/match-result" class="btn btn-success">
-                <i class="fas fa-plus me-2"></i>Add Match Result
-            </a>
+            <a href="/games" class="btn btn-outline-primary me-2">View Games Calendar</a>
+            <a href="/games/add" class="btn btn-outline-success">Add New Game</a>
         </div>
     </div>
 

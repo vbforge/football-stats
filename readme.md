@@ -1,11 +1,13 @@
 # Football Statistics App
 
-A simple Spring Boot application for tracking football player statistics including goals, assists, and calculating streaks.
+A simple Spring Boot application for tracking football statistics.
+
+---
 
 ## Features
 
 - Add player actions (goals and assists) for specific match days
-- Create new players and clubs on the fly
+- Create new players and clubs
 - View comprehensive player statistics table
 - Calculate tournament points (1 point for goal + 1 point for assist)
 - Track goal and assist streaks for each player
@@ -19,6 +21,8 @@ A simple Spring Boot application for tracking football player statistics includi
 - **Frontend:** Thymeleaf, Bootstrap 5, Font Awesome
 - **Tools:** Lombok, Maven
 
+---
+
 ## Setup Instructions
 
 ### 1. Database Setup
@@ -29,7 +33,9 @@ spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```
 
-### 2. Project Structure
+---
+
+### 2. Project Structure (in process)
 ```
 src/main/java/com/example/footballstats/
 ├── FootballStatsApplication.java          # Main Spring Boot application
@@ -59,6 +65,8 @@ src/main/resources/
     └── statistics.html                    # Statistics page
 ```
 
+---
+
 ### 3. Running the Application
 
 1. Make sure MySQL is running
@@ -69,23 +77,19 @@ mvn spring-boot:run
 ```
 4. Open your browser and navigate to `http://localhost:8080`
 
+---
+
 ## Usage
 
 ### Adding Player Actions
-1. Go to the home page (`/`)
-2. Enter match day number
-3. Choose to either:
-   - Select existing player from dropdown (choose club first)
-   - Add new player by checking "Add New Player"
-4. Enter goals and assists
-5. Click "Add Action"
+ * 
+ * 
 
 ### Viewing Statistics
-1. Click "Statistics" in the navigation or visit `/statistics`
-2. View tournament table sorted by total points
-3. See summary cards with total goals, assists, points
-4. Filter by specific club using the dropdown
-5. View top performers in goals and assists
+ * 
+ * 
+
+---
 
 ## Key Features Explained
 
@@ -102,6 +106,8 @@ The app calculates the maximum consecutive match days where a player scored goal
 - No need to pre-register players or clubs
 - Easy match day tracking
 
+---
+
 ## Future Enhancements
 
 Here are some features you can add later:
@@ -111,6 +117,8 @@ Here are some features you can add later:
 - Data export functionality
 - Advanced analytics and charts
 - Player comparison features
+
+---
 
 ## Troubleshooting
 

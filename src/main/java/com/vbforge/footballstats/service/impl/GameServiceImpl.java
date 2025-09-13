@@ -4,15 +4,16 @@ import com.vbforge.footballstats.dto.GameFormDTO;
 import com.vbforge.footballstats.entity.Club;
 import com.vbforge.footballstats.entity.Game;
 import com.vbforge.footballstats.entity.MatchDay;
+import com.vbforge.footballstats.entity.Season;
 import com.vbforge.footballstats.repository.ClubRepository;
 import com.vbforge.footballstats.repository.GameRepository;
 import com.vbforge.footballstats.repository.MatchDayRepository;
 import com.vbforge.footballstats.service.GameService;
+import com.vbforge.footballstats.service.SeasonService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
@@ -24,11 +25,16 @@ public class GameServiceImpl implements GameService {
     private final GameRepository gameRepository;
     private final MatchDayRepository matchDayRepository;
     private final ClubRepository clubRepository;
+    private final SeasonService seasonService;
 
-    public GameServiceImpl(GameRepository gameRepository, MatchDayRepository matchDayRepository, ClubRepository clubRepository) {
+    public GameServiceImpl(GameRepository gameRepository,
+                           MatchDayRepository matchDayRepository,
+                           ClubRepository clubRepository,
+                           SeasonService seasonService) {
         this.gameRepository = gameRepository;
         this.matchDayRepository = matchDayRepository;
         this.clubRepository = clubRepository;
+        this.seasonService = seasonService;
     }
 
     // Basic CRUD operations
@@ -45,7 +51,12 @@ public class GameServiceImpl implements GameService {
     @Override
     @Transactional
     public void saveGame(GameFormDTO gameFormDTO) {
-        MatchDay matchDay = matchDayRepository.findByNumber(gameFormDTO.getMatchDayNumber())
+
+        Season season = seasonService
+                .getSeasonByName(gameFormDTO.getSeasonName())
+                .orElseThrow(()->new RuntimeException("Season not found"));
+
+        MatchDay matchDay = matchDayRepository.findByNumberAndSeason(gameFormDTO.getMatchDayNumber(), season)
                 .orElseGet(()->{
                     MatchDay newMatchDay = new MatchDay();
                     newMatchDay.setNumber(gameFormDTO.getMatchDayNumber());
@@ -61,6 +72,7 @@ public class GameServiceImpl implements GameService {
         game.setHomeClub(homeClub);
         game.setAwayClub(awayClub);
         game.setMatchDay(matchDay);
+        game.setSeason(season);
         game.setGameDate(gameFormDTO.getGameDate());
         game.setHomeGoals(gameFormDTO.getHomeGoals());
         game.setAwayGoals(gameFormDTO.getAwayGoals());
@@ -85,7 +97,7 @@ public class GameServiceImpl implements GameService {
     public List<Game> getGamesByMonth(YearMonth month) {
         LocalDate startOfMonth = LocalDate.from(month.atDay(1).atStartOfDay());
         LocalDate endOfMonth = LocalDate.from(month.atEndOfMonth().atTime(23, 59, 59));
-        return gameRepository.findByGameDateBetweenOrderByGameDateAsc(startOfMonth, endOfMonth);
+        return gameRepository.findByGameDateBetweenOrderByGameDateAsc(startOfMonth.atStartOfDay(), endOfMonth.atStartOfDay());
     }
 
     // Counters

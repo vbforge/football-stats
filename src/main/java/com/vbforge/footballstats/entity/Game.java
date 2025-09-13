@@ -1,17 +1,15 @@
 package com.vbforge.footballstats.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "games")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Game {
@@ -75,21 +73,52 @@ public class Game {
     }
 
     public String getResultForTeam(Club currentTeam) {
+        // Null safety checks
+        if (currentTeam == null || homeClub == null || awayClub == null) {
+            return "vs";
+        }
+
         if (homeGoals == null || awayGoals == null) {
             return "vs";
         }
 
-        if (currentTeam.equals(homeClub)) { // if current team played at home
+        // Check if current team played at home
+        if (currentTeam.getId() != null && currentTeam.getId().equals(homeClub.getId())) {
             if (homeGoals > awayGoals) return "win";
             if (homeGoals < awayGoals) return "lose";
             return "draw";
-        } else if (currentTeam.equals(awayClub)) { // if current team played away
+        }
+        // Check if current team played away
+        else if (currentTeam.getId() != null && currentTeam.getId().equals(awayClub.getId())) {
             if (awayGoals > homeGoals) return "win";
             if (awayGoals < homeGoals) return "lose";
             return "draw";
         }
 
         return "vs"; // fallback if team not part of this game
+    }
+
+    // Alternative method that uses Club name for comparison (less reliable)
+    public String getResultForTeamByName(String teamName) {
+        if (teamName == null || homeClub == null || awayClub == null) {
+            return "vs";
+        }
+
+        if (homeGoals == null || awayGoals == null) {
+            return "vs";
+        }
+
+        if (teamName.equalsIgnoreCase(homeClub.getName())) {
+            if (homeGoals > awayGoals) return "win";
+            if (homeGoals < awayGoals) return "lose";
+            return "draw";
+        } else if (teamName.equalsIgnoreCase(awayClub.getName())) {
+            if (awayGoals > homeGoals) return "win";
+            if (awayGoals < homeGoals) return "lose";
+            return "draw";
+        }
+
+        return "vs";
     }
 
 }

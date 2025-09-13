@@ -3,6 +3,7 @@ package com.vbforge.footballstats.repository;
 import com.vbforge.footballstats.entity.Club;
 import com.vbforge.footballstats.entity.Game;
 import com.vbforge.footballstats.entity.MatchDay;
+import com.vbforge.footballstats.entity.Season;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,9 +30,10 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     List<Game> findByStatusOrderByGameDateAsc(Game.GameStatus status);
 
     // Find games by date range
-    List<Game> findByGameDateBetweenOrderByGameDateAsc(LocalDate startDate, LocalDate endDate);
+    List<Game> findByGameDateBetweenOrderByGameDateAsc(LocalDateTime startDate, LocalDateTime endDate);
 
     // Count finished games
     long countByStatus(Game.GameStatus status);
 
+    List<Game> findBySeasonAndStatusOrderByGameDateAsc(Season season, Game.GameStatus gameStatus);
 }
