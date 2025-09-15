@@ -1,4 +1,4 @@
-package com.vbforge.footballstats.dto;
+package com.vbforge.footballstats.dto.game;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

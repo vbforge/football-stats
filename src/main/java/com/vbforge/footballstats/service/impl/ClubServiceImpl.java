@@ -1,11 +1,12 @@
 package com.vbforge.footballstats.service.impl;
 
-import com.vbforge.footballstats.dto.ClubDetailDTO;
-import com.vbforge.footballstats.dto.ClubStandingsDTO;
-import com.vbforge.footballstats.dto.PlayerStatisticsDTO;
+import com.vbforge.footballstats.dto.club.ClubDetailDTO;
+import com.vbforge.footballstats.dto.league.ClubStandingsDTO;
+import com.vbforge.footballstats.dto.action.PlayerStatisticsDTO;
 import com.vbforge.footballstats.entity.City;
 import com.vbforge.footballstats.entity.Club;
 import com.vbforge.footballstats.repository.ClubRepository;
+import com.vbforge.footballstats.service.ActionService;
 import com.vbforge.footballstats.service.ClubService;
 import com.vbforge.footballstats.service.PlayerService;
 import com.vbforge.footballstats.service.StandingsService;
@@ -21,11 +22,13 @@ public class ClubServiceImpl implements ClubService {
     private final ClubRepository clubRepository;
     private final StandingsService standingsService;
     private final PlayerService playerService;
+    private final ActionService actionService;
 
-    public ClubServiceImpl(ClubRepository clubRepository, StandingsService standingsService, PlayerService playerService) {
+    public ClubServiceImpl(ClubRepository clubRepository, StandingsService standingsService, PlayerService playerService, ActionService actionService) {
         this.clubRepository = clubRepository;
         this.standingsService = standingsService;
         this.playerService = playerService;
+        this.actionService = actionService;
     }
 
     @Override
@@ -74,11 +77,11 @@ public class ClubServiceImpl implements ClubService {
         }
 
         // Get player statistics using existing methods
-        dto.setTopScorers(playerService.getClubTopScorers(clubId, 5));
-        dto.setTopAssisters(playerService.getClubTopAssisters(clubId, 5));
+        dto.setTopScorers(actionService.getClubTopScorers(clubId, 5));
+        dto.setTopAssisters(actionService.getClubTopAssisters(clubId, 5));
 
         // Calculate total players for this club
-        List<PlayerStatisticsDTO> allClubPlayers = playerService.getPlayerStatisticsByClub(clubId);
+        List<PlayerStatisticsDTO> allClubPlayers = actionService.getPlayerStatisticsByClub(clubId);
         dto.setTotalPlayers(allClubPlayers.size());
 
         return dto;

@@ -1,6 +1,6 @@
 package com.vbforge.footballstats.service;
 
-import com.vbforge.footballstats.dto.ClubStandingsDTO;
+import com.vbforge.footballstats.dto.league.ClubStandingsDTO;
 
 import java.util.List;
 

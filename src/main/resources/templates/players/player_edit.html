@@ -2,13 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"><title th:text="${(player != null and player.id != null ? 'Edit ' : 'Add New ')
-                 + 'Player'
-                 + (club != null ? ' - ' + club.name : '')
-                 + ' - Football Stats'}">
-    Edit Player - Football Stats
-</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${(isEditMode == true ? 'Edit ' : 'Add New ') + 'Player' + (club != null ? ' - ' + club.name : '') + ' - Football Stats'}">
+        Add Player - Football Stats
+    </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/index_navbar.css">
     <style>
         .club-header {
             background: linear-gradient(135deg, var(--primary-color, #007bff) 0%, var(--secondary-color, #0056b3) 100%);
@@ -69,17 +69,21 @@
     </style>
 </head>
 <body>
-<!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-dark shadow-sm">
     <div class="container">
-        <a class="navbar-brand" href="/">
-            <i class="fas fa-futbol me-2"></i>Football Stats
+        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="/">
+            <img src="/images/logos/pl-logo-dark.svg" alt="Football Stats Logo" class="me-2">
+            <span th:text="${seasonName}">Premier League</span>
         </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/">Add Action</a>
-            <a class="nav-link" href="/statistics">Statistics</a>
-            <a class="nav-link" href="/match-result">Add Match Result</a>
-            <a class="nav-link" href="/league">League Table</a>
+            <a class="nav-link" href="/actions"><i class="fas fa-plus me-1"></i>Player Action</a>
+            <a class="nav-link" href="/players/statistics"><i class="fas fa-chart-bar me-1"></i>Players Statistics</a>
+            <a class="nav-link" href="/games"><i class="fas fa-futbol me-1"></i>Games Management</a>
+            <!--            <a class="nav-link" href="/games/add"><i class="fas fa-plus me-1"></i>Game</a>-->
+            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League Table</a>
+            <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>
         </div>
     </div>
 </nav>
@@ -88,6 +92,12 @@
 <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show m-3" role="alert">
     <i class="fas fa-exclamation-triangle me-2"></i>
     <span th:text="${errorMessage}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+<div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show m-3" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    <span th:text="${successMessage}"></span>
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 
@@ -107,12 +117,12 @@
             <div class="col">
                 <h1 class="h3 mb-2">
                     <i class="fas fa-user-edit me-2"></i>
-                    <span th:text="${player.id != null ? 'Edit Player' : 'Add New Player'}">Edit Player</span>
+                    <span th:text="${isEditMode == true ? 'Edit Player' : 'Add New Player'}">Add New Player</span>
                 </h1>
                 <div class="d-flex flex-wrap gap-2" th:if="${club != null}">
-                        <span class="badge info-badge">
-                            <i class="fas fa-shield-alt me-1"></i><span th:text="${club.name}">Club Name</span>
-                        </span>
+                    <span class="badge info-badge">
+                        <i class="fas fa-shield-alt me-1"></i><span th:text="${club.name}">Club Name</span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -126,14 +136,18 @@
                 <div class="card-header">
                     <h4 class="mb-0">
                         <i class="fas fa-user me-2"></i>
-                        <span th:text="${player.id != null ? 'Edit Player: ' + player.name : 'Add New Player'}">Player Information</span>
+                        <span th:text="${isEditMode == true ? 'Edit Player: ' + player.name : 'Player Information'}">Player Information</span>
                     </h4>
                 </div>
                 <div class="card-body">
-                    <form th:action="${player.id != null ? '/players/' + player.id + '/update' : '/clubs/' + club.id + '/players'}"
-                          th:object="${player}" method="post">
-                        <input type="hidden" th:field="*{id}" th:if="${player.id != null}">
-                        <input type="hidden" name="clubId" th:value="${club != null ? club.id : ''}">
+                    <!-- Form action depends on edit mode -->
+                    <form th:action="${isEditMode == true ? '/players/' + player.id : '/players/club/' + club.id}"
+                          th:object="${player}"
+                          method="post">
+
+                        <!-- Hidden field for edit mode -->
+                        <input type="hidden" th:field="*{id}" th:if="${isEditMode == true}">
+                        <input type="hidden" th:field="*{clubId}">
 
                         <div class="row mb-3">
                             <div class="col-md-8">
@@ -192,9 +206,8 @@
                                 <input type="text" class="form-control" id="nationality" th:field="*{nationality}"
                                        placeholder="e.g., England, Brazil, Spain">
                             </div>
-                            <!-- dropdown flags choice -->
                             <div class="col-md-6">
-                                <label for="flagPath" class="form-label">Flag Path</label>
+                                <label for="flagPath" class="form-label">Flag</label>
                                 <select class="form-select" id="flagPath" th:field="*{flagPath}">
                                     <option value="">-- Select Flag --</option>
                                     <option value="/images/nationalities/ao.svg">Angola</option>
@@ -203,10 +216,11 @@
                                     <option value="/images/nationalities/au.svg">Australia</option>
                                     <option value="/images/nationalities/ba.svg">Bosnia & Herzegovina</option>
                                     <option value="/images/nationalities/be.svg">Belgium</option>
+                                    <option value="/images/nationalities/br.svg">Brazil</option>
                                     <option value="/images/nationalities/bf.svg">Burkina Faso</option>
                                     <option value="/images/nationalities/cd.svg">DR Congo</option>
                                     <option value="/images/nationalities/ch.svg">Switzerland</option>
-                                    <option value="/images/nationalities/ci.svg">Cote d’Ivoire</option>
+                                    <option value="/images/nationalities/ci.svg">Cote d'Ivoire</option>
                                     <option value="/images/nationalities/cm.svg">Cameron</option>
                                     <option value="/images/nationalities/co.svg">Colombia</option>
                                     <option value="/images/nationalities/cz.svg">Czech Republic</option>
@@ -221,7 +235,7 @@
                                     <option value="/images/nationalities/gb-eng.svg">England</option>
                                     <option value="/images/nationalities/gb-nir.svg">Northern Ireland</option>
                                     <option value="/images/nationalities/gb-sct.svg">Scotland</option>
-                                    <option value="/images/nationalities/gb-wls.svg">Welsh</option>
+                                    <option value="/images/nationalities/gb-wls.svg">Wales</option>
                                     <option value="/images/nationalities/gh.svg">Ghana</option>
                                     <option value="/images/nationalities/gw.svg">Guinea Bissau</option>
                                     <option value="/images/nationalities/hr.svg">Croatia</option>
@@ -235,7 +249,7 @@
                                     <option value="/images/nationalities/ng.svg">Nigeria</option>
                                     <option value="/images/nationalities/nl.svg">Netherlands</option>
                                     <option value="/images/nationalities/no.svg">Norway</option>
-                                    <option value="/images/nationalities/nz.svg">New Zeeland</option>
+                                    <option value="/images/nationalities/nz.svg">New Zealand</option>
                                     <option value="/images/nationalities/pl.svg">Poland</option>
                                     <option value="/images/nationalities/pt.svg">Portugal</option>
                                     <option value="/images/nationalities/py.svg">Paraguay</option>
@@ -249,25 +263,22 @@
                                     <option value="/images/nationalities/uy.svg">Uruguay</option>
                                     <option value="/images/nationalities/za.svg">South Africa</option>
                                     <option value="/images/nationalities/zw.svg">Zimbabwe</option>
-
-
-                                    <!-- add more as needed -->
+                                    <option value="/images/nationalities/eg.svg">Egypt</option>
                                 </select>
                                 <div class="form-text">Choose the flag for nationality</div>
                             </div>
-
                         </div>
 
                         <div class="mb-3">
                             <label for="dateOfBirth" class="form-label">Date of Birth *</label>
                             <input type="date" class="form-control" id="dateOfBirth" th:field="*{dateOfBirth}" required
                                    th:max="${T(java.time.LocalDate).now().toString()}">
-                            <div class="form-text">Player must be born before today</div>
+                            <div class="form-text">Player must be born before today and be at least 16 years old</div>
                         </div>
 
                         <div class="d-flex justify-content-between">
                             <div>
-                                <a th:href="${player.id != null ? '/players/' + player.id : '/clubs/' + club.id + '/squad/manage'}"
+                                <a th:href="${club != null ? '/players/club/' + club.id + '/squad/manage' : '/league'}"
                                    class="btn btn-secondary">
                                     <i class="fas fa-times me-2"></i>Cancel
                                 </a>
@@ -275,7 +286,7 @@
                             <div>
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-save me-2"></i>
-                                    <span th:text="${player.id != null ? 'Update Player' : 'Add Player'}">Save Player</span>
+                                    <span th:text="${isEditMode == true ? 'Update Player' : 'Add Player'}">Add Player</span>
                                 </button>
                             </div>
                         </div>
@@ -284,34 +295,41 @@
             </div>
 
             <!-- Preview Card (for existing players) -->
-            <div th:if="${player.id != null}" class="card mt-4">
+            <div th:if="${isEditMode == true}" class="card mt-4">
                 <div class="card-header">
                     <h5 class="mb-0"><i class="fas fa-eye me-2"></i>Player Preview</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
+                    <div class="row align-items-center">
                         <div class="col-auto">
                             <div class="player-number bg-primary text-white d-flex align-items-center justify-content-center"
                                  style="width: 50px; height: 50px; border-radius: 50%; font-size: 1.25rem; font-weight: bold;"
-                                 th:text="${player.shirtNumber ?: '?'}">
-                                10
+                                 th:text="${player.shirtNumber != null ? player.shirtNumber : '?'}">
+                                ?
                             </div>
                         </div>
                         <div class="col">
-                            <h6 class="mb-1" th:text="${player.name ?: 'Player Name'}">Player Name</h6>
+                            <h6 class="mb-1" th:text="${player.name != null ? player.name : 'Player Name'}">Player Name</h6>
                             <div class="d-flex gap-2">
-                                    <span class="badge bg-secondary"
-                                          th:text="${player.position != null ? player.position.name() : 'Position'}">
-                                        MIDFIELDER
-                                    </span>
-                                <span th:if="${player.nationality}" class="badge bg-info">
-                                        <span th:text="${player.nationality}">Nationality</span>
-                                    </span>
+                                <span class="badge bg-secondary"
+                                      th:text="${player.position != null ? player.position.name() : 'Position'}">
+                                    Position
+                                </span>
+                                <span th:if="${player.nationality != null && !player.nationality.isEmpty()}"
+                                      class="badge bg-info">
+                                    <span th:text="${player.nationality}">Nationality</span>
+                                </span>
                             </div>
                             <small class="text-muted"
                                    th:text="${player.dateOfBirth != null ? 'Born: ' + #temporals.format(player.dateOfBirth, 'dd/MM/yyyy') : 'Date of Birth not set'}">
-                                Born: 01/01/1990
+                                Date of Birth not set
                             </small>
+                        </div>
+                        <div class="col-auto" th:if="${player.flagPath != null && !player.flagPath.isEmpty()}">
+                            <img th:src="${player.flagPath}"
+                                 th:alt="${player.nationality + ' flag'}"
+                                 style="width: 24px; height: 16px; object-fit: cover; border-radius: 2px;"
+                                 onerror="this.style.display='none';">
                         </div>
                     </div>
                 </div>

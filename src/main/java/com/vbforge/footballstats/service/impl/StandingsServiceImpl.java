@@ -1,6 +1,6 @@
 package com.vbforge.footballstats.service.impl;
 
-import com.vbforge.footballstats.dto.ClubStandingsDTO;
+import com.vbforge.footballstats.dto.league.ClubStandingsDTO;
 import com.vbforge.footballstats.entity.Club;
 import com.vbforge.footballstats.entity.Game;
 import com.vbforge.footballstats.entity.Season;
@@ -8,7 +8,6 @@ import com.vbforge.footballstats.repository.ClubRepository;
 import com.vbforge.footballstats.repository.GameRepository;
 import com.vbforge.footballstats.repository.SeasonRepository;
 import com.vbforge.footballstats.service.StandingsService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -33,7 +33,7 @@ public class CitiesController {
         List<City> cities = cityService.getAllCities();
         model.addAttribute("cities", cities);
         model.addAttribute("totalCities", cities.size());
-        return "interactive_map";
+        return "map/interactive_map";
     }
 
     @GetMapping("/{cityName}")
@@ -54,7 +54,7 @@ public class CitiesController {
             model.addAttribute("error", "City not found");
         }
 
-        return "city_page";
+        return "map/city_page";
     }
 
 }

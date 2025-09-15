@@ -1,6 +1,6 @@
 package com.vbforge.footballstats.controller;
 
-import com.vbforge.footballstats.dto.ClubStandingsDTO;
+import com.vbforge.footballstats.dto.league.ClubStandingsDTO;
 import com.vbforge.footballstats.entity.Season;
 import com.vbforge.footballstats.service.SeasonService;
 import com.vbforge.footballstats.service.StandingsService;

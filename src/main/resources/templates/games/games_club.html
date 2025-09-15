@@ -169,7 +169,7 @@
                             <!-- Match Day -->
                             <td>
                                 <a th:if="${game.matchDay != null}"
-                                   th:href="@{/games/matchday/{id}(id=${game.matchDay.id})}"
+                                   th:href="@{/games/match-day/{id}(id=${game.matchDay.id})}"
                                    th:text="${game.matchDay.number}"
                                    class="btn btn-sm btn-outline-primary"></a>
                                 <span th:unless="${game.matchDay != null}" class="text-muted">-</span>

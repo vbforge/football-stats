@@ -1,17 +1,12 @@
 package com.vbforge.footballstats.controller;
 
-import com.vbforge.footballstats.dto.ClubStandingsDTO;
-import com.vbforge.footballstats.dto.PlayerStatisticsDTO;
+import com.vbforge.footballstats.dto.league.ClubStandingsDTO;
+import com.vbforge.footballstats.dto.action.PlayerStatisticsDTO;
 import com.vbforge.footballstats.entity.City;
 import com.vbforge.footballstats.entity.Season;
-import com.vbforge.footballstats.service.CityService;
-import com.vbforge.footballstats.service.PlayerService;
-import com.vbforge.footballstats.service.SeasonService;
-import com.vbforge.footballstats.service.StandingsService;
+import com.vbforge.footballstats.service.*;
 import com.vbforge.footballstats.entity.Game;
 import com.vbforge.footballstats.entity.MatchDay;
-import com.vbforge.footballstats.service.GameService;
-import com.vbforge.footballstats.service.MatchDayService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,19 +26,21 @@ public class IndexController {
     private final PlayerService playerService;
     private final GameService gameService;
     private final MatchDayService matchDayService;
+    private final ActionService actionService;
 
     public IndexController(SeasonService seasonService,
                            CityService cityService,
                            StandingsService standingsService,
                            PlayerService playerService,
                            GameService gameService,
-                           MatchDayService matchDayService) {
+                           MatchDayService matchDayService, ActionService actionService) {
         this.seasonService = seasonService;
         this.cityService = cityService;
         this.standingsService = standingsService;
         this.playerService = playerService;
         this.gameService = gameService;
         this.matchDayService = matchDayService;
+        this.actionService = actionService;
     }
 
     @GetMapping("/")
@@ -68,7 +65,7 @@ public class IndexController {
         List<ClubStandingsDTO> standings = standingsService.getCurrentSeasonStandings();
         model.addAttribute("standings", standings);
 
-        List<PlayerStatisticsDTO> stats = playerService.getAllPlayerStatistics();
+        List<PlayerStatisticsDTO> stats = actionService.getAllPlayerStatistics();
         // Top goal scorers (only players with goals > 0)
         List<PlayerStatisticsDTO> topScorers = stats.stream()
                 .filter(stat -> stat.getTotalGoals() > 0)

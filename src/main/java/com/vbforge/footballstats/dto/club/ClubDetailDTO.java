@@ -1,9 +1,9 @@
-package com.vbforge.footballstats.dto;
+package com.vbforge.footballstats.dto.club;
 
+import com.vbforge.footballstats.dto.action.PlayerStatsDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import java.util.List;
 

@@ -28,7 +28,18 @@ public class Action {
     @Column(nullable = false)
     private Integer assists = 0;
 
+    // Updated point calculation: Goals = 3 points, Assists = 1 point
     public Integer getTotalPoints(){
-        return goals + assists;
+        return (goals * 3) + assists;
+    }
+
+    // Helper method to get goals weighted score
+    public Integer getGoalsPoints() {
+        return goals * 3;
+    }
+
+    // Helper method to get assists weighted score
+    public Integer getAssistsPoints() {
+        return assists;
     }
 }

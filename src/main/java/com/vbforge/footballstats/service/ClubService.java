@@ -1,6 +1,6 @@
 package com.vbforge.footballstats.service;
 
-import com.vbforge.footballstats.dto.ClubDetailDTO;
+import com.vbforge.footballstats.dto.club.ClubDetailDTO;
 import com.vbforge.footballstats.entity.City;
 import com.vbforge.footballstats.entity.Club;
 

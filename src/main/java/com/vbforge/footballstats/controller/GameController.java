@@ -1,7 +1,7 @@
 package com.vbforge.footballstats.controller;
 
-import com.vbforge.footballstats.dto.GameFormDTO;
-import com.vbforge.footballstats.dto.GameUpdateDTO;
+import com.vbforge.footballstats.dto.game.GameFormDTO;
+import com.vbforge.footballstats.dto.game.GameUpdateDTO;
 import com.vbforge.footballstats.entity.Club;
 import com.vbforge.footballstats.entity.Game;
 import com.vbforge.footballstats.entity.MatchDay;
@@ -10,9 +10,12 @@ import com.vbforge.footballstats.service.ClubService;
 import com.vbforge.footballstats.service.GameService;
 import com.vbforge.footballstats.service.MatchDayService;
 import com.vbforge.footballstats.service.SeasonService;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/games")
+@Slf4j
 public class GameController {
 
     private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM");
@@ -86,7 +90,7 @@ public class GameController {
             model.addAttribute("selectedClub", selectedClub);
         }
 
-        return "games";
+        return "games/games";
     }
 
     @GetMapping("/club/{clubId}")
@@ -106,7 +110,7 @@ public class GameController {
         model.addAttribute("club", club);
         model.addAttribute("pageTitle", "Games for " + club.getName());
 
-        return "club-games";
+        return "games/games_club";
     }
 
     @GetMapping("/match-day/{matchDayId}")
@@ -126,7 +130,7 @@ public class GameController {
         model.addAttribute("matchDay", matchDay);
         model.addAttribute("pageTitle", "Match Day " + matchDay.getNumber());
 
-        return "games_match_day";
+        return "games/games_match_day";
     }
 
     @GetMapping("/month")
@@ -141,7 +145,7 @@ public class GameController {
         model.addAttribute("selectedMonth", selectedMonth);
         model.addAttribute("pageTitle", "Games for " + selectedMonth.getMonth() + " " + selectedMonth.getYear());
 
-        return "games_month";
+        return "games/games_month";
     }
 
     @GetMapping("/scheduled")
@@ -154,7 +158,7 @@ public class GameController {
         model.addAttribute("scheduledGames", scheduledGames);
         model.addAttribute("pageTitle", "Scheduled Games");
 
-        return "games_scheduled";
+        return "games/games_scheduled";
     }
 
     @GetMapping("/finished")
@@ -167,35 +171,82 @@ public class GameController {
         model.addAttribute("finishedGames", finishedGames);
         model.addAttribute("pageTitle", "Finished Games");
 
-        return "games_finished";
+        return "games/games_finished";
     }
 
     @GetMapping("/add")
     public String gameForm(Model model) {
-        Season season = seasonService.getCurrentSeason().orElseThrow();
+        Season season = seasonService.getCurrentSeason()
+                .orElseThrow(() -> new RuntimeException("No current season found"));
+
         model.addAttribute("seasonName", season.getName());
         model.addAttribute("gameForm", new GameFormDTO());
         model.addAttribute("clubs", clubService.getAllClubs());
-        return "add-game";
+        return "games/games_add";
     }
 
     @PostMapping("/add-game")
-    public String addGame(@ModelAttribute GameFormDTO gameFormDTO,
+    public String addGame(@Valid @ModelAttribute GameFormDTO gameFormDTO,
+                          BindingResult bindingResult,
                           RedirectAttributes redirectAttributes) {
-        try {
-            gameService.saveGame(gameFormDTO);
-            redirectAttributes.addFlashAttribute("success",
-                    "Game added successfully for " + gameFormDTO.getHomeClub() + " vs " + gameFormDTO.getAwayClub());
-        } catch (Exception e) {
+
+        // Check for validation errors
+        if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("error",
-                    "Error adding match result: " + e.getMessage());
+                    "Please correct the form errors and try again");
+            redirectAttributes.addFlashAttribute("gameForm", gameFormDTO);
+            return "redirect:/games/add";
         }
+
+        try {
+            // Additional custom validation
+            if (gameFormDTO.getHomeClub() != null &&
+                    gameFormDTO.getHomeClub().equals(gameFormDTO.getAwayClub())) {
+                redirectAttributes.addFlashAttribute("error",
+                        "Home and away clubs must be different");
+                redirectAttributes.addFlashAttribute("gameForm", gameFormDTO);
+                return "redirect:/games/add";
+            }
+
+            gameService.saveGame(gameFormDTO);
+
+            String successMessage = gameFormDTO.getStatus() != null &&
+                    "FINISHED".equals(gameFormDTO.getStatus()) ?
+                    String.format("Game result added: %s %d-%d %s",
+                            gameFormDTO.getHomeClub(),
+                            gameFormDTO.getHomeGoals(),
+                            gameFormDTO.getAwayGoals(),
+                            gameFormDTO.getAwayClub()) :
+                    String.format("Game scheduled: %s vs %s",
+                            gameFormDTO.getHomeClub(),
+                            gameFormDTO.getAwayClub());
+
+            redirectAttributes.addFlashAttribute("success", successMessage);
+
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("gameForm", gameFormDTO);
+            return "redirect:/games/add";
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Error adding game: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("gameForm", gameFormDTO);
+            return "redirect:/games/add";
+        } catch (Exception e) {
+            log.error("Unexpected error adding game", e);
+            redirectAttributes.addFlashAttribute("error",
+                    "An unexpected error occurred. Please try again.");
+            redirectAttributes.addFlashAttribute("gameForm", gameFormDTO);
+            return "redirect:/games/add";
+        }
+
         return "redirect:/games";
     }
 
     @GetMapping("/edit/{gameId}")
     public String editGameForm(@PathVariable Long gameId, Model model) {
-        Season season = seasonService.getCurrentSeason().orElseThrow();
+        Season season = seasonService.getCurrentSeason()
+                .orElseThrow(() -> new RuntimeException("No current season found"));
         model.addAttribute("seasonName", season.getName());
 
         Optional<Game> gameOpt = gameService.getGameById(gameId);
@@ -216,15 +267,16 @@ public class GameController {
         model.addAttribute("game", game);
         model.addAttribute("gameUpdateForm", gameUpdateForm);
 
-        return "edit-game";
+        return "games/games_edit";
     }
 
     @PostMapping("/edit/{gameId}")
     public String updateGame(@PathVariable Long gameId,
                              @ModelAttribute GameUpdateDTO gameUpdateForm,
                              RedirectAttributes redirectAttributes) {
+
         try {
-            // Validate form data
+            // Additional validation
             if (!gameUpdateForm.isValid()) {
                 redirectAttributes.addFlashAttribute("error",
                         "Invalid input. Goals must be between 0 and 20, and status must be selected.");
@@ -239,10 +291,17 @@ public class GameController {
 
             Game game = gameOpt.get();
 
-            // Update game data
-            game.setHomeGoals(gameUpdateForm.getHomeGoals());
-            game.setAwayGoals(gameUpdateForm.getAwayGoals());
-            game.setStatus(Game.GameStatus.valueOf(gameUpdateForm.getStatus()));
+            // Update game data based on status
+            Game.GameStatus newStatus = Game.GameStatus.valueOf(gameUpdateForm.getStatus());
+            game.setStatus(newStatus);
+
+            if (newStatus == Game.GameStatus.FINISHED) {
+                game.setHomeGoals(gameUpdateForm.getHomeGoals());
+                game.setAwayGoals(gameUpdateForm.getAwayGoals());
+            } else {
+                game.setHomeGoals(null);
+                game.setAwayGoals(null);
+            }
 
             // Save updated game
             gameService.updateGame(game);
@@ -258,25 +317,44 @@ public class GameController {
             redirectAttributes.addFlashAttribute("success", resultMessage);
 
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("error",
-                    "Invalid status value: " + gameUpdateForm.getStatus());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/games/edit/" + gameId;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error",
                     "Error updating game: " + e.getMessage());
+            return "redirect:/games/edit/" + gameId;
+        } catch (Exception e) {
+            log.error("Unexpected error updating game", e);
+            redirectAttributes.addFlashAttribute("error",
+                    "An unexpected error occurred. Please try again.");
             return "redirect:/games/edit/" + gameId;
         }
 
         return "redirect:/games";
     }
 
-    // Quick update endpoint for AJAX calls (optional)
+    // Quick update endpoint for AJAX calls
     @PostMapping("/edit/{gameId}/quick-finish")
     @ResponseBody
     public ResponseEntity<?> quickFinishGame(@PathVariable Long gameId,
                                              @RequestParam Integer homeGoals,
                                              @RequestParam Integer awayGoals) {
         try {
+            // Validate goals
+            if (homeGoals < 0 || awayGoals < 0) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "Goals cannot be negative"
+                ));
+            }
+
+            if (homeGoals > 20 || awayGoals > 20) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "Goals cannot exceed 20"
+                ));
+            }
+
             Optional<Game> gameOpt = gameService.getGameById(gameId);
             if (gameOpt.isEmpty()) {
                 return ResponseEntity.notFound().build();

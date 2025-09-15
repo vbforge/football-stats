@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Statistics - Football Stats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/index_map.css">
+    <link rel="stylesheet" href="/css/index_navbar.css">
+    <link rel="stylesheet" href="/css/stats_cards.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="/">
+            <img src="/images/logos/pl-logo-dark.svg" alt="Football Stats Logo" class="me-2">
+            <span th:text="${seasonName}">Premier League</span>
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/actions"><i class="fas fa-plus me-1"></i>Player Action</a>
+            <a class="nav-link" href="/players/statistics"><i class="fas fa-chart-bar me-1"></i>Players Statistics</a>
+            <a class="nav-link" href="/players/streaks"><i class="fas fa-fire me-1"></i>Streaks Leaderboard</a>
+            <a class="nav-link" href="/actions/manage"><i class="fas fa-cogs me-1"></i>Manage Actions</a>
+            <a class="nav-link" href="/players/create"><i class="fas fa-user-plus me-1"></i>Add Player</a>
+            <a class="nav-link" href="/games"><i class="fas fa-futbol me-1"></i>Games Management</a>
+            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League Table</a>
+            <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Controls Row -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="dropdown">
+                <button class="btn btn-outline-primary dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown">
+                    <i class="fas fa-filter me-2"></i>Filter by Club
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/players/statistics">All Clubs</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li th:each="club : ${clubs}">
+                        <a class="dropdown-item"
+                           th:href="@{/players/statistics/club/{id}(id=${club.id})}"
+                           th:text="${club.name}"
+                           th:classappend="${selectedClubId == club.id} ? 'active' : ''"></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-6 text-end">
+            <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="pageSize" id="size10" value="10"
+                       th:checked="${pageSize == 10}">
+                <label class="btn btn-outline-secondary" for="size10">10</label>
+
+                <input type="radio" class="btn-check" name="pageSize" id="size20" value="20"
+                       th:checked="${pageSize == 20}">
+                <label class="btn btn-outline-secondary" for="size20">20</label>
+
+                <input type="radio" class="btn-check" name="pageSize" id="size50" value="50"
+                       th:checked="${pageSize == 50}">
+                <label class="btn btn-outline-secondary" for="size50">50</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Point System Info -->
+    <div class="alert alert-info" role="alert">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <i class="fas fa-futbol text-success me-1"></i>
+                <strong>Goals = 3 points</strong>
+            </div>
+            <div class="col-md-4">
+                <i class="fas fa-hands-helping text-info me-1"></i>
+                <strong>Assists = 1 point</strong>
+            </div>
+            <div class="col-md-4">
+                <i class="fas fa-calculator text-warning me-1"></i>
+                <strong>Total = (Goals × 3) + Assists</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card stats-card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-futbol fa-2x mb-2"></i>
+                    <h4 th:text="${totalGoals}">0</h4>
+                    <small>Total Goals</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-hands-helping fa-2x mb-2"></i>
+                    <h4 th:text="${totalAssists}">0</h4>
+                    <small>Total Assists</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h4 th:text="${totalPoints}">0</h4>
+                    <small>Total Points</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <h4 th:text="${activePlayers}">0</h4>
+                    <small>Active Players</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performers -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="fas fa-crown me-2"></i>Top Goal Scorers</h6>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(topScorers)}" class="text-center text-muted">
+                        <i class="fas fa-futbol fa-2x mb-2"></i>
+                        <p>No goals scored yet</p>
+                    </div>
+                    <div th:each="stat : ${topScorers}"
+                         class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <strong th:text="${stat.playerName}"></strong>
+                            <small class="text-muted" th:text="' (' + ${stat.clubName} + ')'"></small>
+                        </div>
+                        <span class="badge bg-success"
+                              th:text="${stat.totalGoals} + ' goals (' + (${stat.totalGoals} * 3) + ' pts)'"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="fas fa-hands-helping me-2"></i>Top Assist Providers</h6>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(topAssistProviders)}" class="text-center text-muted">
+                        <i class="fas fa-hands-helping fa-2x mb-2"></i>
+                        <p>No assists made yet</p>
+                    </div>
+                    <div th:each="stat : ${topAssistProviders}"
+                         class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <strong th:text="${stat.playerName}"></strong>
+                            <small class="text-muted" th:text="' (' + ${stat.clubName} + ')'"></small>
+                        </div>
+                        <span class="badge bg-info" th:text="${stat.totalAssists} + ' assists'"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Players Statistics Table -->
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-trophy me-2"></i>
+                Players Statistics
+                <small th:if="${selectedClubId}" class="text-white-50">- Club Filter Active</small>
+                <small class="text-white-50 ms-2" th:if="${statsPage}"
+                       th:text="'(Page ' + (${statsPage.number} + 1) + ' of ' + ${statsPage.totalPages} + ')'"></small>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Pos</th>
+                        <th>
+                            <a th:href="@{/players/statistics(page=${currentPage}, size=${pageSize}, sortBy='name', sortDir=${sortBy == 'name' ? reverseSortDir : 'asc'}, clubId=${selectedClubId})}"
+                               class="text-white text-decoration-none">
+                                Player
+                                <i th:if="${sortBy == 'name'}" class="fas"
+                                   th:classappend="${sortDir == 'asc' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
+                            </a>
+                        </th>
+                        <th>
+                            <a th:href="@{/players/statistics(page=${currentPage}, size=${pageSize}, sortBy='club', sortDir=${sortBy == 'club' ? reverseSortDir : 'asc'}, clubId=${selectedClubId})}"
+                               class="text-white text-decoration-none">
+                                Club
+                                <i th:if="${sortBy == 'club'}" class="fas"
+                                   th:classappend="${sortDir == 'asc' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
+                            </a>
+                        </th>
+                        <th class="text-center">
+                            <a th:href="@{/players/statistics(page=${currentPage}, size=${pageSize}, sortBy='goals', sortDir=${sortBy == 'goals' ? reverseSortDir : 'desc'}, clubId=${selectedClubId})}"
+                               class="text-white text-decoration-none">
+                                Goals
+                                <i th:if="${sortBy == 'goals'}" class="fas"
+                                   th:classappend="${sortDir == 'asc' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
+                            </a>
+                        </th>
+                        <th class="text-center">
+                            <a th:href="@{/players/statistics(page=${currentPage}, size=${pageSize}, sortBy='assists', sortDir=${sortBy == 'assists' ? reverseSortDir : 'desc'}, clubId=${selectedClubId})}"
+                               class="text-white text-decoration-none">
+                                Assists
+                                <i th:if="${sortBy == 'assists'}" class="fas"
+                                   th:classappend="${sortDir == 'asc' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
+                            </a>
+                        </th>
+                        <th class="text-center">
+                            <a th:href="@{/players/statistics(page=${currentPage}, size=${pageSize}, sortBy='points', sortDir=${sortBy == 'points' ? reverseSortDir : 'desc'}, clubId=${selectedClubId})}"
+                               class="text-white text-decoration-none">
+                                Points
+                                <i th:if="${sortBy == 'points'}" class="fas"
+                                   th:classappend="${sortDir == 'asc' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
+                            </a>
+                        </th>
+                        <th class="text-center">Goal Streak</th>
+                        <th class="text-center">Assist Streak</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="stat, iterStat : ${playerStats}"
+                        th:class="${iterStat.index < 3} ? 'table-warning' : ''">
+                        <!--                        <td class="fw-bold">-->
+                        <!--                            <span th:switch="${iterStat.index + (${currentPage} * ${pageSize})}">-->
+                        <!--                                <i th:case="0" class="fas fa-trophy trophy-gold me-1"></i>-->
+                        <!--                                <i th:case="1" class="fas fa-medal trophy-silver me-1"></i>-->
+                        <!--                                <i th:case="2" class="fas fa-medal trophy-bronze me-1"></i>-->
+                        <!--                            </span>-->
+                        <!--                            <span th:text="${iterStat.index + 1 + (${currentPage} * ${pageSize})}"></span>-->
+                        <!--                        </td>-->
+                        <td class="fw-bold">
+    <span th:switch="${iterStat.index + (currentPage * pageSize)}">
+        <i th:case="0" class="fas fa-trophy trophy-gold me-1"></i>
+        <i th:case="1" class="fas fa-medal trophy-silver me-1"></i>
+        <i th:case="2" class="fas fa-medal trophy-bronze me-1"></i>
+    </span>
+                            <span th:text="${iterStat.index + 1 + (currentPage * pageSize)}"></span>
+                        </td>
+                        <td class="fw-semibold">
+                            <a th:href="@{/players/{id}(id=${stat.playerId})}"
+                               class="text-decoration-none" th:text="${stat.playerName}"></a>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary" th:text="${stat.clubName}"></span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-success" th:text="${stat.totalGoals}"></span>
+                            <small class="text-muted d-block"
+                                   th:text="'(' + (${stat.totalGoals} * 3) + ' pts)'"></small>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-info" th:text="${stat.totalAssists}"></span>
+                            <small class="text-muted d-block" th:text="'(' + ${stat.totalAssists} + ' pts)'"></small>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-primary fs-6" th:text="${stat.totalPoints}"></span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-warning text-dark"
+                                  th:text="${stat.maxGoalStreak}"
+                                  th:title="'Longest scoring streak: ' + ${stat.maxGoalStreak} + ' match days'"></span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-warning text-dark"
+                                  th:text="${stat.maxAssistStreak}"
+                                  th:title="'Longest assist streak: ' + ${stat.maxAssistStreak} + ' match days'"></span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a th:href="@{/players/{id}(id=${stat.playerId})}"
+                                   class="btn btn-outline-primary btn-sm" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a th:href="@{/actions/player/{id}(id=${stat.playerId})}"
+                                   class="btn btn-outline-info btn-sm" title="View Actions">
+                                    <i class="fas fa-list"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<!--    &lt;!&ndash; Pagination &ndash;&gt;-->
+<!--    <nav th:if="${statsPage and statsPage.totalPages > 1}" class="mt-4">-->
+<!--        <ul class="pagination justify-content-center">-->
+<!--            &lt;!&ndash; Previous Page &ndash;&gt;-->
+<!--            <li class="page-item" th:classappend="${!statsPage.hasPrevious()} ? 'disabled'">-->
+<!--                <a class="page-link"-->
+<!--                   th:href="${statsPage.hasPrevious()} ? @{/players/statistics(page=${currentPage - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})} : '#'">-->
+<!--                    <i class="fas fa-chevron-left"></i>-->
+<!--                </a>-->
+<!--            </li>-->
+
+<!--            &lt;!&ndash; Page Numbers &ndash;&gt;-->
+<!--            <li class="page-item"-->
+<!--                th:each="pageNum : ${#numbers.sequence(0, statsPage.totalPages - 1)}"-->
+<!--                th:classappend="${pageNum == currentPage} ? 'active'">-->
+<!--                <a class="page-link"-->
+<!--                   th:href="@{/players/statistics(page=${pageNum}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})}"-->
+<!--                   th:text="${pageNum + 1}"></a>-->
+<!--            </li>-->
+
+<!--            &lt;!&ndash; Next Page &ndash;&gt;-->
+<!--            <li class="page-item" th:classappend="${!statsPage.hasNext()} ? 'disabled'">-->
+<!--                <a class="page-link"-->
+<!--                   th:href="${statsPage.hasNext()} ? @{/players/statistics(page=${currentPage + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})} : '#'">-->
+<!--                    <i class="fas fa-chevron-right"></i>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--        </ul>-->
+
+<!--        &lt;!&ndash; Page Info &ndash;&gt;-->
+<!--        <div class="text-center text-muted mt-2">-->
+<!--            <small>-->
+<!--                Showing <span th:text="${(currentPage * pageSize) + 1}">1</span> to-->
+<!--                <span th:text="${(currentPage + 1) * pageSize > statsPage.totalElements ? statsPage.totalElements : (currentPage + 1) * pageSize}">20</span>-->
+<!--                of <span th:text="${statsPage.totalElements}">100</span> players-->
+<!--            </small>-->
+<!--        </div>-->
+<!--    </nav>-->
+
+    <!-- Pagination -->
+    <nav th:if="${statsPage != null and statsPage.totalPages > 1}" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <!-- Previous Page -->
+            <li class="page-item" th:classappend="${!statsPage.hasPrevious()} ? 'disabled'">
+                <a class="page-link"
+                   th:href="${statsPage.hasPrevious()} ? @{/players/statistics(page=${currentPage - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})} : '#'">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+
+            <!-- Page Numbers -->
+            <li class="page-item"
+                th:each="pageNum : ${#numbers.sequence(0, statsPage.totalPages - 1)}"
+                th:classappend="${pageNum == currentPage} ? 'active'">
+                <a class="page-link"
+                   th:href="@{/players/statistics(page=${pageNum}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})}"
+                   th:text="${pageNum + 1}"></a>
+            </li>
+
+            <!-- Next Page -->
+            <li class="page-item" th:classappend="${!statsPage.hasNext()} ? 'disabled'">
+                <a class="page-link"
+                   th:href="${statsPage.hasNext()} ? @{/players/statistics(page=${currentPage + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})} : '#'">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+
+        <!-- Page Info -->
+        <div class="text-center text-muted mt-2">
+            <small>
+                Showing <span th:text="${(currentPage * pageSize) + 1}">1</span> to
+                <span th:text="${(currentPage + 1) * pageSize > statsPage.totalElements ? statsPage.totalElements : (currentPage + 1) * pageSize}">20</span>
+                of <span th:text="${statsPage.totalElements}">100</span> players
+            </small>
+        </div>
+    </nav>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Handle page size changes
+    document.querySelectorAll('input[name="pageSize"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.set('size', this.value);
+            currentUrl.searchParams.set('page', '0'); // Reset to first page
+            window.location.href = currentUrl.toString();
+        });
+    });
+
+    // Add tooltip support for streak badges
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"], [title]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+</script>
+</body>
+</html>

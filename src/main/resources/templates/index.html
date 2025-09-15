@@ -33,10 +33,10 @@
             <span th:text="${seasonName}">Premier League</span>
         </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/action"><i class="fas fa-plus me-1"></i>Player Action</a>
+            <a class="nav-link" href="/actions"><i class="fas fa-plus me-1"></i>Player Action</a>
             <a class="nav-link" href="/players/statistics"><i class="fas fa-chart-bar me-1"></i>Players Statistics</a>
             <a class="nav-link" href="/games"><i class="fas fa-futbol me-1"></i>Games Management</a>
-            <a class="nav-link" href="/games/add"><i class="fas fa-plus me-1"></i>Game</a>
+<!--            <a class="nav-link" href="/games/add"><i class="fas fa-plus me-1"></i>Game</a>-->
             <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League Table</a>
             <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>
         </div>
@@ -101,7 +101,7 @@
 
                 <!-- Top Assist Providers -->
                 <br>
-<!--                <br>-->
+                <!--                <br>-->
                 <div class="container">
                     <div class="card">
 
@@ -213,9 +213,11 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <small>
-                                                    <span class="badge champions-league me-2">1-4</span>Champions League (Group stage)
+                                                    <span class="badge champions-league me-2">1-4</span>Champions League
+                                                    (Group stage)
                                                     <br>
-                                                    <span class="badge europa-league me-2">5</span>Europa League (Group stage)
+                                                    <span class="badge europa-league me-2">5</span>Europa League (Group
+                                                    stage)
                                                     <br>
                                                     <span class="badge top-half me-2">6-10</span>Top Half
                                                     <br>
@@ -321,7 +323,7 @@
 
                                         <!-- Column: score (always centered vertically) -->
                                         <div class="col-2">
-                            <span class="badge bg-secondary fs-6 px-3 py-2 d-block"
+                            <span class="badge bg-success fs-6 px-3 py-2 d-block"
                                   th:text="${game.homeGoals} + ' - ' + ${game.awayGoals}"></span>
                                         </div>
                                     </div>
@@ -427,8 +429,6 @@
                 <br>
             </div>
         </div>
-
-
 
 
     </div>

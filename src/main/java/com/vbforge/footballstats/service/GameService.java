@@ -1,6 +1,6 @@
 package com.vbforge.footballstats.service;
 
-import com.vbforge.footballstats.dto.GameFormDTO;
+import com.vbforge.footballstats.dto.game.GameFormDTO;
 import com.vbforge.footballstats.entity.Club;
 import com.vbforge.footballstats.entity.Game;
 import com.vbforge.footballstats.entity.MatchDay;
