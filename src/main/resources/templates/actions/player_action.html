@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Actions - Football Statistics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/index_map.css">
+    <link rel="stylesheet" href="/css/index_navbar.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="/">
+            <img src="/images/logos/pl-logo-dark.svg" alt="Football Stats Logo" class="me-2">
+            <span th:text="${seasonName}">Premier League</span>
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/actions/add"><i class="fas fa-plus me-1"></i>Player Action</a>
+            <a class="nav-link" href="/actions/manage"><i class="fas fa-cogs me-1"></i>Manage Actions</a>
+            <a class="nav-link" href="/actions/streaks"><i class="fas fa-fire me-1"></i>Streaks Leaderboard</a>
+            <a class="nav-link" href="/actions"><i class="fas fa-futbol me-1"></i>Goals & Assists</a>
+            <a class="nav-link" href="/games"><i class="fas fa-calendar-alt me-1"></i>Games</a>
+            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League</a>
+            <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Error Message -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Player Header -->
+    <div th:if="${player}" class="row mb-4">
+        <div class="col-md-8">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                         style="width: 60px; height: 60px;">
+                        <i class="fas fa-user fa-2x"></i>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="mb-1" th:text="${player.name}">Player Name</h2>
+                    <div class="text-muted">
+                        <span class="badge bg-secondary me-2" th:text="${player.club.name}">Club Name</span>
+                        <small>Player ID: <span th:text="${player.id}">1</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group" role="group">
+                <a th:href="@{/players/{id}(id=${player.id})}" class="btn btn-outline-primary">
+                    <i class="fas fa-user me-1"></i>Player Profile
+                </a>
+                <a th:href="@{/actions/add(playerId=${player.id})}" class="btn btn-success">
+                    <i class="fas fa-plus me-1"></i>Add Action
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Season Summary Cards -->
+    <div th:if="${player}" class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-futbol fa-2x mb-2"></i>
+                    <h3 th:text="${totalGoals}">0</h3>
+                    <small>Season Goals</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-hands-helping fa-2x mb-2"></i>
+                    <h3 th:text="${totalAssists}">0</h3>
+                    <small>Season Assists</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h3 th:text="${totalPoints}">0</h3>
+                    <small>Total Points</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                    <h3 th:text="${#lists.size(actions)}">0</h3>
+                    <small>Match Days</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions Timeline -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-timeline me-2"></i>
+                <span th:if="${player}">Action History for <span th:text="${player.name}"></span></span>
+                <span th:unless="${player}">Player Actions</span>
+                <small class="text-white-50 ms-2" th:if="${!#lists.isEmpty(actions)}">
+                    (<span th:text="${#lists.size(actions)}">0</span> match days recorded)
+                </small>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <!-- No Actions State -->
+            <div th:if="${#lists.isEmpty(actions)}" class="text-center p-5 text-muted">
+                <i class="fas fa-clipboard-list fa-4x mb-3"></i>
+                <h4 th:if="${player}">No Actions Recorded</h4>
+                <h4 th:unless="${player}">Player Not Found</h4>
+                <p th:if="${player}" class="mb-4">
+                    <span th:text="${player.name}"></span> hasn't recorded any actions this season yet.
+                </p>
+                <p th:unless="${player}" class="mb-4">
+                    The requested player could not be found or you don't have permission to view their actions.
+                </p>
+                <div>
+                    <a th:if="${player}" th:href="@{/actions/add(playerId=${player.id})}" class="btn btn-primary btn-lg me-2">
+                        <i class="fas fa-plus me-2"></i>Record First Action
+                    </a>
+                    <a href="/actions" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-chart-line me-2"></i>View All Statistics
+                    </a>
+                </div>
+            </div>
+
+            <!-- Actions Table -->
+            <div th:unless="${#lists.isEmpty(actions)}" class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Match Day</th>
+                        <th class="text-center">Goals</th>
+                        <th class="text-center">Assists</th>
+                        <th class="text-center">Points</th>
+                        <th class="text-center">Performance</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="action : ${actions}"
+                        th:class="${action.totalPoints > 0} ? '' : 'table-light'">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                     style="width: 35px; height: 35px; font-size: 0.8rem;">
+                                    <span th:text="${action.matchDay.number}">1</span>
+                                </div>
+                                <div>
+                                    <strong>Match Day <span th:text="${action.matchDay.number}">1</span></strong>
+                                    <small class="text-muted d-block">
+                                        <a th:href="@{/actions/match-day/{day}(day=${action.matchDay.number})}"
+                                           class="text-decoration-none">
+                                            <i class="fas fa-external-link-alt me-1"></i>View all actions
+                                        </a>
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <span th:if="${action.goals > 0}" class="badge bg-success fs-6" th:text="${action.goals}"></span>
+                            <span th:if="${action.goals == 0}" class="text-muted">-</span>
+                            <small class="text-muted d-block" th:if="${action.goals > 0}"
+                                   th:text="'(' + (${action.goals} * 3) + ' pts)'"></small>
+                        </td>
+                        <td class="text-center">
+                            <span th:if="${action.assists > 0}" class="badge bg-info fs-6" th:text="${action.assists}"></span>
+                            <span th:if="${action.assists == 0}" class="text-muted">-</span>
+                            <small class="text-muted d-block" th:if="${action.assists > 0}"
+                                   th:text="'(' + ${action.assists} + ' pts)'"></small>
+                        </td>
+                        <td class="text-center">
+                                <span th:if="${action.totalPoints > 0}"
+                                      class="badge bg-primary fs-5" th:text="${action.totalPoints}"></span>
+                            <span th:if="${action.totalPoints == 0}"
+                                  class="badge bg-light text-dark">0</span>
+                        </td>
+                        <td class="text-center">
+                            <!-- Performance indicators -->
+                            <div th:if="${action.goals > 0 and action.assists > 0}">
+                                    <span class="badge bg-purple text-white">
+                                        <i class="fas fa-star me-1"></i>Excellent
+                                    </span>
+                                <small class="text-success d-block">Goal + Assist</small>
+                            </div>
+                            <div th:if="${action.goals > 1 and action.assists == 0}">
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-fire me-1"></i>Multi-Goal
+                                    </span>
+                                <small class="text-success d-block" th:text="${action.goals} + ' goals'"></small>
+                            </div>
+                            <div th:if="${action.goals == 1 and action.assists == 0}">
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-futbol me-1"></i>Scorer
+                                    </span>
+                            </div>
+                            <div th:if="${action.goals == 0 and action.assists > 1}">
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-magic me-1"></i>Multi-Assist
+                                    </span>
+                                <small class="text-info d-block" th:text="${action.assists} + ' assists'"></small>
+                            </div>
+                            <div th:if="${action.goals == 0 and action.assists == 1}">
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-hands-helping me-1"></i>Playmaker
+                                    </span>
+                            </div>
+                            <div th:if="${action.goals == 0 and action.assists == 0}">
+                                    <span class="badge bg-light text-muted">
+                                        <i class="fas fa-minus me-1"></i>No Points
+                                    </span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a th:href="@{/actions/edit/{id}(id=${action.id})}"
+                                   class="btn btn-outline-warning btn-sm" title="Edit Action">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a th:href="@{/actions/match-day/{day}(day=${action.matchDay.number})}"
+                                   class="btn btn-outline-info btn-sm" title="View Match Day">
+                                    <i class="fas fa-calendar-day"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Actions Summary Footer -->
+        <div th:if="${!#lists.isEmpty(actions)}" class="card-footer bg-light">
+            <div class="row text-center">
+                <div class="col-md-2">
+                    <strong>Appearances</strong><br>
+                    <span class="text-primary fs-5" th:text="${#lists.size(actions)}">0</span>
+                </div>
+                <div class="col-md-2">
+                    <strong>Goals</strong><br>
+                    <span class="text-success fs-5" th:text="${totalGoals}">0</span>
+                </div>
+                <div class="col-md-2">
+                    <strong>Assists</strong><br>
+                    <span class="text-info fs-5" th:text="${totalAssists}">0</span>
+                </div>
+                <div class="col-md-2">
+                    <strong>Total Points</strong><br>
+                    <span class="text-primary fs-5" th:text="${totalPoints}">0</span>
+                </div>
+                <div class="col-md-2">
+                    <strong>Average/Game</strong><br>
+                    <span class="text-dark fs-5"
+                          th:text="${#lists.size(actions) > 0 ? (#numbers.formatDecimal(totalPoints / #lists.size(actions), 1, 1)) : '0.0'}">0.0</span>
+                </div>
+                <div class="col-md-2">
+                    <strong>Best Game</strong><br>
+<!--                    <span class="text-warning fs-5" th:text="${actions.stream().mapToInt(action -> action.totalPoints).max().orElse(0)}">0</span>-->
+                    <span class="text-warning fs-5" th:text="${totalPoints}">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Info and Navigation -->
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Performance Insights</h6>
+                </div>
+                <div class="card-body">
+                    <div th:if="${!#lists.isEmpty(actions)}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <small class="text-muted">Goal-Scoring Form:</small>
+                                <div class="progress mb-2" style="height: 20px;">
+<!--                                    <div class="progress-bar bg-success"-->
+<!--                                         th:style="'width: ' + (${totalGoals > 0 ? (totalGoals * 100.0 / (#lists.size(actions) * 3)) : 0}) + '%'"-->
+<!--                                         th:text="${totalGoals > 0 ? (#numbers.formatDecimal(totalGoals * 100.0 / (#lists.size(actions) * 3), 1, 1) + '%') : '0%'}">-->
+<!--                                    </div>-->
+                                    <div class="progress-bar bg-success"
+                                         th:style="'width: ' + (${totalPoints > 0 ? 100 : 0}) + '%'"
+                                         th:text="${totalPoints > 0 ? '100%' : '0%'}">
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted">Assist Rate:</small>
+                                <div class="progress mb-2" style="height: 20px;">
+                                    <div class="progress-bar bg-info"
+                                         th:style="'width: ' + (${totalAssists > 0 ? (totalAssists * 100.0 / #lists.size(actions)) : 0}) + '%'"
+                                         th:text="${totalAssists > 0 ? (#numbers.formatDecimal(totalAssists * 100.0 / #lists.size(actions), 1, 1) + '%') : '0%'}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Goal rate shows scoring frequency, assist rate shows playmaking contribution
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(actions)}" class="text-center text-muted">
+                        <i class="fas fa-chart-line fa-2x mb-2"></i>
+                        <p>Performance insights will appear after recording actions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0"><i class="fas fa-compass me-2"></i>Quick Navigation</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/actions" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-trophy me-1"></i>Season Leaderboard
+                        </a>
+                        <a href="/actions/streaks" class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-fire me-1"></i>Streak Leaders
+                        </a>
+                        <a href="/actions/manage" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-cogs me-1"></i>Manage Actions
+                        </a>
+                        <a th:if="${player}" th:href="@{/actions/add(playerId=${player.id})}" class="btn btn-success btn-sm">
+                            <i class="fas fa-plus me-1"></i>Add New Action
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add custom CSS for purple badge
+        const style = document.createElement('style');
+        style.textContent = '.bg-purple { background-color: #6f42c1 !important; }';
+        document.head.appendChild(style);
+
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert-dismissible');
+            alerts.forEach(alert => {
+                const bootstrapAlert = new bootstrap.Alert(alert);
+                bootstrapAlert.close();
+            });
+        }, 5000);
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Actions - Football Statistics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/index_map.css">
+    <link rel="stylesheet" href="/css/index_navbar.css">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="/">
+            <img src="/images/logos/pl-logo-dark.svg" alt="Football Stats Logo" class="me-2">
+            <span th:text="${seasonName}">Premier League</span>
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/actions/add"><i class="fas fa-plus me-1"></i>Player Action</a>
+            <a class="nav-link" href="/actions/manage"><i class="fas fa-cogs me-1"></i>Manage Actions</a>
+            <a class="nav-link" href="/actions/streaks"><i class="fas fa-fire me-1"></i>Streaks Leaderboard</a>
+            <a class="nav-link" href="/actions"><i class="fas fa-futbol me-1"></i>Goals & Assists</a>
+            <a class="nav-link" href="/games"><i class="fas fa-calendar-alt me-1"></i>Games</a>
+            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League</a>
+            <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-cogs text-primary me-2"></i>Manage Player Actions</h2>
+            <p class="text-muted">Edit or delete existing player actions by match day</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="/actions/add" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i>Add New Action
+            </a>
+        </div>
+    </div>
+
+    <!-- Match Day Filter -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter by Match Day</h5>
+        </div>
+        <div class="card-body">
+            <form action="/actions/manage" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Match Day Number:</label>
+                    <input type="number" name="matchDay" class="form-control"
+                           th:value="${selectedMatchDay}" placeholder="Enter match day number" min="1">
+                </div>
+                <div class="col-md-8 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search me-1"></i>Load Actions
+                    </button>
+                    <a href="/actions/manage" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i>Clear Filter
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Actions Table -->
+    <div th:if="${actions}" class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>
+                Actions for Match Day <span th:text="${selectedMatchDay}">1</span>
+                <small class="text-white-50 ms-2">(<span th:text="${#lists.size(actions)}">0</span> actions found)</small>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div th:if="${#lists.isEmpty(actions)}" class="text-center p-4 text-muted">
+                <i class="fas fa-search fa-3x mb-3"></i>
+                <h5>No Actions Found</h5>
+                <p>No player actions recorded for this match day.</p>
+                <a th:href="@{/actions/add}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Add First Action
+                </a>
+            </div>
+
+            <div th:unless="${#lists.isEmpty(actions)}" class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-dark">
+                    <tr>
+                        <th>Player</th>
+                        <th>Club</th>
+                        <th class="text-center">Goals</th>
+                        <th class="text-center">Assists</th>
+                        <th class="text-center">Total Points</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="action : ${actions}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <div class="fw-semibold" th:text="${action.player.name}"></div>
+                                    <small class="text-muted">#<span th:text="${action.player.id}"></span></small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary" th:text="${action.player.club.name}"></span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-success" th:text="${action.goals}"></span>
+                            <small class="text-muted d-block" th:text="'(' + (${action.goals} * 3) + ' pts)'"></small>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-info" th:text="${action.assists}"></span>
+                            <small class="text-muted d-block" th:text="'(' + ${action.assists} + ' pts)'"></small>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-primary fs-6" th:text="${action.totalPoints}"></span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a th:href="@{/actions/edit/{id}(id=${action.id})}"
+                                   class="btn btn-outline-warning" title="Edit Action">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger"
+                                        onclick="confirmDelete([[${action.id}]], '[[${action.player.name}]]')"
+                                        title="Delete Action">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Match Day Summary -->
+        <div th:unless="${#lists.isEmpty(actions)}" class="card-footer bg-light">
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <strong>Total Goals</strong><br>
+                    <span class="text-success fs-5" th:text="${totalGoals}">0</span>
+                </div>
+                <div class="col-md-3">
+                    <strong>Total Assists</strong><br>
+                    <span class="text-info fs-5" th:text="${totalAssists}">0</span>
+                </div>
+                <div class="col-md-3">
+                    <strong>Total Points</strong><br>
+                    <span class="text-primary fs-5" th:text="${totalPoints}">0</span>
+                </div>
+                <div class="col-md-3">
+                    <strong>Active Players</strong><br>
+                    <span class="text-dark fs-5" th:text="${#lists.size(actions)}">0</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="fas fa-lightning me-1"></i>Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/actions/add" class="btn btn-outline-primary">
+                            <i class="fas fa-plus me-2"></i>Add New Action
+                        </a>
+                        <a href="/actions" class="btn btn-outline-info">
+                            <i class="fas fa-chart-line me-2"></i>View Statistics
+                        </a>
+                        <a href="/actions/streaks" class="btn btn-outline-warning">
+                            <i class="fas fa-fire me-2"></i>Streak Leaderboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0"><i class="fas fa-info-circle me-1"></i>Management Tips</h6>
+                </div>
+                <div class="card-body">
+                    <div class="small text-muted">
+                        <p class="mb-2">
+                            <i class="fas fa-edit me-1 text-warning"></i>
+                            <strong>Edit:</strong> Modify goals and assists for existing actions
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-trash me-1 text-danger"></i>
+                            <strong>Delete:</strong> Remove actions completely (use with caution)
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-search me-1 text-primary"></i>
+                            <strong>Filter:</strong> Search by match day to find specific actions
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the action for <strong id="deletePlayerName"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-warning me-2"></i>This action cannot be undone!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Delete Action
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function confirmDelete(actionId, playerName) {
+        document.getElementById('deletePlayerName').textContent = playerName;
+        document.getElementById('deleteForm').action = '/actions/delete/' + actionId;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert-dismissible');
+        alerts.forEach(alert => {
+            const bootstrapAlert = new bootstrap.Alert(alert);
+            bootstrapAlert.close();
+        });
+    }, 5000);
+</script>
+</body>
+</html>

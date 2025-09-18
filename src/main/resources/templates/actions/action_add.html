@@ -18,13 +18,12 @@
             <span th:text="${seasonName}">Premier League</span>
         </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/actions"><i class="fas fa-plus me-1"></i>Player Action</a>
-            <a class="nav-link" href="/players/statistics"><i class="fas fa-chart-bar me-1"></i>Players Statistics</a>
-            <a class="nav-link" href="/players/streaks"><i class="fas fa-fire me-1"></i>Streaks Leaderboard</a>
+            <a class="nav-link" href="/actions/add"><i class="fas fa-plus me-1"></i>Player Action</a>
             <a class="nav-link" href="/actions/manage"><i class="fas fa-cogs me-1"></i>Manage Actions</a>
-            <a class="nav-link" href="/players/create"><i class="fas fa-user-plus me-1"></i>Add Player</a>
-            <a class="nav-link" href="/games"><i class="fas fa-futbol me-1"></i>Games Management</a>
-            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League Table</a>
+            <a class="nav-link" href="/actions/streaks"><i class="fas fa-fire me-1"></i>Streaks Leaderboard</a>
+            <a class="nav-link" href="/actions"><i class="fas fa-futbol me-1"></i>Goals & Assists</a>
+            <a class="nav-link" href="/games"><i class="fas fa-calendar-alt me-1"></i>Games</a>
+            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League</a>
             <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>
         </div>
     </div>
@@ -72,15 +71,6 @@
                             </div>
                         </div>
 
-                        <div class="mb-3" th:unless="${editMode}">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox"
-                                       id="newPlayerCheck" th:field="*{newPlayer}">
-                                <label class="form-check-label" for="newPlayerCheck">
-                                    Add New Player
-                                </label>
-                            </div>
-                        </div>
 
                         <!-- Existing Player Selection -->
                         <div id="existingPlayerSection" th:style="${editMode} ? 'display: block;' : ''">
@@ -156,11 +146,6 @@
                             </div>
                         </div>
 
-<!--                        <button type="submit" class="btn w-100" th:classappend="${editMode} ? 'btn-warning' : 'btn-success'">-->
-<!--                            <i class="fas" th:classappend="${editMode} ? 'fa-save' : 'fa-plus'" class="me-2"></i>-->
-<!--                            <span th:text="${editMode} ? 'Update Action' : 'Add Action'"></span>-->
-<!--                        </button>-->
-
                         <button type="submit" class="btn w-100" th:classappend="${editMode} ? ' btn-warning' : ' btn-success'">
                             <i class="fas me-2" th:classappend="${editMode} ? ' fa-save' : ' fa-plus'"></i>
                             <span th:text="${editMode} ? 'Update Action' : 'Add Action'"></span>
@@ -178,17 +163,14 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2 mb-3">
-                        <a href="/players/statistics" class="btn btn-outline-primary">
+                        <a href="/actions" class="btn btn-outline-primary">
                             <i class="fas fa-chart-line me-2"></i>Player Statistics
                         </a>
-                        <a href="/players/streaks" class="btn btn-outline-warning">
+                        <a href="/actions/streaks" class="btn btn-outline-warning">
                             <i class="fas fa-fire me-2"></i>Streak Leaderboard
                         </a>
                         <a href="/actions/manage" class="btn btn-outline-info">
                             <i class="fas fa-cogs me-2"></i>Manage Actions
-                        </a>
-                        <a href="/players/create" class="btn btn-outline-success">
-                            <i class="fas fa-user-plus me-2"></i>Add New Player
                         </a>
                     </div>
 
@@ -217,7 +199,7 @@
                     <h6 class="mb-0"><i class="fas fa-clock me-1"></i>Quick Match Day Search</h6>
                 </div>
                 <div class="card-body">
-                    <form action="/actions/matchday/" method="get" class="d-flex">
+                    <form action="/actions/match-day/" method="get" class="d-flex">
                         <input type="number" name="matchDay" class="form-control me-2" placeholder="Match Day #" min="1">
                         <button type="submit" class="btn btn-outline-secondary">
                             <i class="fas fa-search"></i>
@@ -265,13 +247,14 @@
         playerSelect.innerHTML = '<option value="">Choose player...</option>';
 
         if (clubId) {
-            fetch(`/players/api/players/club/${clubId}`)
+            fetch(`/players/club/${clubId}`)
                 .then(response => response.json())
                 .then(players => {
                     players.forEach(player => {
                         const option = document.createElement('option');
                         option.value = player.id;
-                        option.textContent = player.name + (player.shirtNumber ? ` (#${player.shirtNumber})` : '');
+                        // option.textContent = player.name + (player.shirtNumber ? ` (#${player.shirtNumber})` : '');
+                        option.textContent = player.name;
                         playerSelect.appendChild(option);
                     });
                 })
@@ -301,11 +284,11 @@
     updatePointsPreview();
 
     // Form submission redirect for match day search
-    document.querySelector('form[action="/actions/matchday/"]').addEventListener('submit', function(e) {
+    document.querySelector('form[action="/actions/match-day/"]').addEventListener('submit', function(e) {
         e.preventDefault();
         const matchDay = this.querySelector('input[name="matchDay"]').value;
         if (matchDay) {
-            window.location.href = `/actions/matchday/${matchDay}`;
+            window.location.href = `/actions/match-day/${matchDay}`;
         }
     });
 </script>

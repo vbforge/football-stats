@@ -17,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,162 +40,13 @@ public class ActionController {
         this.seasonService = seasonService;
     }
 
-    // Main action form page
-    @GetMapping()
-    public String action(Model model) {
-        Season season = seasonService.getCurrentSeason().orElseThrow();
-        model.addAttribute("seasonName", season.getName());
-        model.addAttribute("actionForm", new ActionFormDTO());
-        model.addAttribute("clubs", clubService.getAllClubs());
-        model.addAttribute("players", playerService.getAllPlayers());
-        return "actions_stats/action_add";
-    }
-
-    // Add new action
-    @PostMapping("/add")
-    public String addAction(@ModelAttribute ActionFormDTO actionForm,
-                            RedirectAttributes redirectAttributes) {
-        try {
-            actionService.saveAction(actionForm);
-            redirectAttributes.addFlashAttribute("success",
-                    "Action added successfully for " + actionForm.getPlayerName());
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error",
-                    "Error adding action: " + e.getMessage());
-        }
-        return "redirect:/actions";
-    }
-
-    // View actions by match day
-    @GetMapping("/matchday/{matchDayNumber}")
-    public String viewMatchDayActions(@PathVariable Integer matchDayNumber, Model model) {
-        Season season = seasonService.getCurrentSeason().orElseThrow();
-        List<Action> actions = actionService.getActionsByMatchDay(matchDayNumber);
-
-        model.addAttribute("seasonName", season.getName());
-        model.addAttribute("matchDayNumber", matchDayNumber);
-        model.addAttribute("actions", actions);
-
-        // Calculate match day totals
-        int totalGoals = actions.stream().mapToInt(Action::getGoals).sum();
-        int totalAssists = actions.stream().mapToInt(Action::getAssists).sum();
-        int totalPoints = actions.stream().mapToInt(Action::getTotalPoints).sum();
-
-        model.addAttribute("totalGoals", totalGoals);
-        model.addAttribute("totalAssists", totalAssists);
-        model.addAttribute("totalPoints", totalPoints);
-
-        return "matchday_actions";
-    }
-
-    // Edit action form
-    @GetMapping("/edit/{actionId}")
-    public String editActionForm(@PathVariable Long actionId, Model model) {
-        try {
-            ActionFormDTO actionForm = actionService.getActionFormForEdit(actionId);
-            Season season = seasonService.getCurrentSeason().orElseThrow();
-
-            model.addAttribute("seasonName", season.getName());
-            model.addAttribute("actionForm", actionForm);
-            model.addAttribute("actionId", actionId);
-            model.addAttribute("clubs", clubService.getAllClubs());
-            model.addAttribute("players", playerService.getAllPlayers());
-            model.addAttribute("editMode", true);
-
-            return "player_action";
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "Action not found: " + e.getMessage());
-            return "redirect:/actions";
-        }
-    }
-
-    // Update existing action
-    @PostMapping("/update/{actionId}")
-    public String updateAction(@PathVariable Long actionId,
-                               @ModelAttribute ActionFormDTO actionForm,
-                               RedirectAttributes redirectAttributes) {
-        try {
-            actionService.updateActionFromForm(actionForm);
-            redirectAttributes.addFlashAttribute("success",
-                    "Action updated successfully for " + actionForm.getPlayerName());
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error",
-                    "Error updating action: " + e.getMessage());
-        }
-        return "redirect:/actions";
-    }
-
-    // Delete action
-    @PostMapping("/delete/{actionId}")
-    public String deleteAction(@PathVariable Long actionId,
-                               RedirectAttributes redirectAttributes) {
-        try {
-            Action action = actionService.getActionById(actionId);
-            String playerName = action.getPlayer().getName();
-            Integer matchDay = action.getMatchDay().getNumber();
-
-            actionService.deleteAction(actionId);
-            redirectAttributes.addFlashAttribute("success",
-                    "Action deleted successfully for " + playerName + " (Match Day " + matchDay + ")");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error",
-                    "Error deleting action: " + e.getMessage());
-        }
-        return "redirect:/actions";
-    }
-
-    // View all actions for a player
-    @GetMapping("/player/{playerId}")
-    public String viewPlayerActions(@PathVariable Long playerId, Model model) {
-        try {
-            List<Action> actions = actionService.getActionsByPlayer(playerId);
-            Season season = seasonService.getCurrentSeason().orElseThrow();
-
-            if (!actions.isEmpty()) {
-                model.addAttribute("player", actions.get(0).getPlayer());
-            }
-
-            model.addAttribute("seasonName", season.getName());
-            model.addAttribute("actions", actions);
-
-            // Calculate player totals
-            int totalGoals = actions.stream().mapToInt(Action::getGoals).sum();
-            int totalAssists = actions.stream().mapToInt(Action::getAssists).sum();
-            int totalPoints = actions.stream().mapToInt(Action::getTotalPoints).sum();
-
-            model.addAttribute("totalGoals", totalGoals);
-            model.addAttribute("totalAssists", totalAssists);
-            model.addAttribute("totalPoints", totalPoints);
-
-            return "player_action";
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "Error loading player actions: " + e.getMessage());
-            return "redirect:/actions";
-        }
-    }
-
-    // Management page for actions
-    @GetMapping("/manage")
-    public String manageActions(@RequestParam(required = false) Integer matchDay, Model model) {
-        Season season = seasonService.getCurrentSeason().orElseThrow();
-        model.addAttribute("seasonName", season.getName());
-
-        if (matchDay != null) {
-            List<Action> actions = actionService.getActionsByMatchDay(matchDay);
-            model.addAttribute("actions", actions);
-            model.addAttribute("selectedMatchDay", matchDay);
-        }
-
-        return "actions_management";
-    }
-
-    @GetMapping("/statistics")
-    public String viewStatistics(@RequestParam(defaultValue = "0") int page,
-                                 @RequestParam(defaultValue = "20") int size,
-                                 @RequestParam(defaultValue = "points") String sortBy,
-                                 @RequestParam(defaultValue = "desc") String sortDir,
-                                 @RequestParam(required = false) Long clubId,
-                                 Model model) {
+    @GetMapping("")
+    public String viewActions(@RequestParam(defaultValue = "0") int page,
+                              @RequestParam(defaultValue = "20") int size,
+                              @RequestParam(defaultValue = "points") String sortBy,
+                              @RequestParam(defaultValue = "desc") String sortDir,
+                              @RequestParam(required = false) Long clubId,
+                              Model model) {
 
         Season season = seasonService.getCurrentSeason().orElseThrow();
         model.addAttribute("seasonName", season.getName());
@@ -245,8 +97,195 @@ public class ActionController {
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
 
-        return "players_statistics";
+        return "actions/action_statistics";
     }
+
+//    // Main action form page
+//    @GetMapping("/add")
+//    public String action(Model model) {
+//        Season season = seasonService.getCurrentSeason().orElseThrow();
+//        model.addAttribute("seasonName", season.getName());
+//        model.addAttribute("actionForm", new ActionFormDTO());
+//        model.addAttribute("clubs", clubService.getAllClubs());
+//        model.addAttribute("players", playerService.getAllPlayers());
+//        return "actions/action_add";
+//    }
+
+    @GetMapping("/add")
+    public String action(@RequestParam(required = false) Integer matchDay,
+                         @RequestParam(required = false) Long playerId,
+                         Model model) {
+        Season season = seasonService.getCurrentSeason().orElseThrow();
+        model.addAttribute("seasonName", season.getName());
+
+        ActionFormDTO actionForm = new ActionFormDTO();
+        if (matchDay != null) {
+            actionForm.setMatchDayNumber(matchDay);
+        }
+        if (playerId != null) {
+            actionForm.setPlayerId(playerId);
+        }
+
+        model.addAttribute("actionForm", actionForm);
+        model.addAttribute("clubs", clubService.getAllClubs());
+        model.addAttribute("players", playerService.getAllPlayers());
+        return "actions/action_add";
+    }
+
+    // Add new action
+    @PostMapping("/add")
+    public String addAction(@ModelAttribute ActionFormDTO actionForm,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            actionService.saveAction(actionForm);
+            redirectAttributes.addFlashAttribute("success",
+                    "Action added successfully for " + actionForm.getPlayerName());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Error adding action: " + e.getMessage());
+        }
+        return "redirect:/actions/add";
+    }
+
+    // View actions by match day
+    @GetMapping("/match-day/{matchDayNumber}")
+    public String viewMatchDayActions(@PathVariable Integer matchDayNumber, Model model) {
+        Season season = seasonService.getCurrentSeason().orElseThrow();
+        List<Action> actions = actionService.getActionsByMatchDay(matchDayNumber);
+
+        //sort actions by total points desc
+        actions.sort(Comparator.comparingInt(Action::getTotalPoints).reversed());
+
+        model.addAttribute("seasonName", season.getName());
+        model.addAttribute("matchDayNumber", matchDayNumber);
+        model.addAttribute("actions", actions);
+
+        // Calculate match day totals
+        int totalGoals = actions.stream().mapToInt(Action::getGoals).sum();
+        int totalAssists = actions.stream().mapToInt(Action::getAssists).sum();
+        int totalPoints = actions.stream().mapToInt(Action::getTotalPoints).sum();
+
+        boolean noPointsScored = actions.stream().allMatch(a -> a.getTotalPoints() == 0);
+
+        model.addAttribute("totalGoals", totalGoals);
+        model.addAttribute("totalAssists", totalAssists);
+        model.addAttribute("totalPoints", totalPoints);
+        model.addAttribute("noPointsScored", noPointsScored);
+
+        return "actions/match-day_actions";
+    }
+
+    // Edit action form
+    @GetMapping("/edit/{actionId}")
+    public String editActionForm(@PathVariable Long actionId, Model model) {
+        try {
+            ActionFormDTO actionForm = actionService.getActionFormForEdit(actionId);
+            Season season = seasonService.getCurrentSeason().orElseThrow();
+
+            model.addAttribute("seasonName", season.getName());
+            model.addAttribute("actionForm", actionForm);
+            model.addAttribute("actionId", actionId);
+            model.addAttribute("clubs", clubService.getAllClubs());
+            model.addAttribute("players", playerService.getAllPlayers());
+            model.addAttribute("editMode", true);
+
+            return "actions/action_add";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Action not found: " + e.getMessage());
+            return "redirect:/actions/actions_statistics";
+        }
+    }
+
+    // Update existing action
+    @PostMapping("/update/{actionId}")
+    public String updateAction(@PathVariable Long actionId,
+                               @ModelAttribute ActionFormDTO actionForm,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            actionService.updateActionFromForm(actionForm);
+            redirectAttributes.addFlashAttribute("success",
+                    "Action updated successfully for " + actionForm.getPlayerName());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Error updating action: " + e.getMessage());
+        }
+        return "redirect:/actions/actions_statistics";
+    }
+
+    // Delete action
+    @PostMapping("/delete/{actionId}")
+    public String deleteAction(@PathVariable Long actionId,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            Action action = actionService.getActionById(actionId);
+            String playerName = action.getPlayer().getName();
+            Integer matchDay = action.getMatchDay().getNumber();
+
+            actionService.deleteAction(actionId);
+            redirectAttributes.addFlashAttribute("success",
+                    "Action deleted successfully for " + playerName + " (Match Day " + matchDay + ")");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Error deleting action: " + e.getMessage());
+        }
+        return "redirect:/actions/actions_statistics";
+    }
+
+    // View all actions for a player
+    @GetMapping("/player/{playerId}")
+    public String viewPlayerActions(@PathVariable Long playerId, Model model) {
+        try {
+            List<Action> actions = actionService.getActionsByPlayer(playerId);
+            Season season = seasonService.getCurrentSeason().orElseThrow();
+
+            if (!actions.isEmpty()) {
+                model.addAttribute("player", actions.get(0).getPlayer());
+            }
+
+            model.addAttribute("seasonName", season.getName());
+            model.addAttribute("actions", actions);
+
+            // Calculate player totals
+            int totalGoals = actions.stream().mapToInt(Action::getGoals).sum();
+            int totalAssists = actions.stream().mapToInt(Action::getAssists).sum();
+            int totalPoints = actions.stream().mapToInt(Action::getTotalPoints).sum();
+
+            model.addAttribute("totalGoals", totalGoals);
+            model.addAttribute("totalAssists", totalAssists);
+            model.addAttribute("totalPoints", totalPoints);
+
+            return "actions/player_action";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Error loading player actions: " + e.getMessage());
+            return "redirect:/actions";
+        }
+    }
+
+    // Management page for actions
+    @GetMapping("/manage")
+    public String manageActions(@RequestParam(required = false) Integer matchDay, Model model) {
+        Season season = seasonService.getCurrentSeason().orElseThrow();
+        model.addAttribute("seasonName", season.getName());
+
+        if (matchDay != null) {
+            List<Action> actions = actionService.getActionsByMatchDay(matchDay);
+            model.addAttribute("actions", actions);
+            model.addAttribute("selectedMatchDay", matchDay);
+
+            int totalGoals = actions.stream().mapToInt(Action::getGoals).sum();
+            int totalAssists = actions.stream().mapToInt(Action::getAssists).sum();
+            int totalPoints = actions.stream().mapToInt(Action::getTotalPoints).sum();
+
+            model.addAttribute("totalGoals", totalGoals);
+            model.addAttribute("totalAssists", totalAssists);
+            model.addAttribute("totalPoints", totalPoints);
+            model.addAttribute("actions", actions);
+        }
+
+        return "actions/actions_management";
+    }
+
+
 
     @GetMapping("/statistics/club/{clubId}")
     public String viewClubStatistics(@PathVariable Long clubId,
@@ -255,7 +294,7 @@ public class ActionController {
                                      @RequestParam(defaultValue = "points") String sortBy,
                                      @RequestParam(defaultValue = "desc") String sortDir,
                                      Model model) {
-        return viewStatistics(page, size, sortBy, sortDir, clubId, model);
+        return viewActions(page, size, sortBy, sortDir, clubId, model);
     }
 
     @GetMapping("/streaks")
@@ -270,7 +309,7 @@ public class ActionController {
         model.addAttribute("assistStreaks", assistStreaks);
         model.addAttribute("limit", limit);
 
-        return "streaks_leaderboard";
+        return "actions/action_streaks_leaderboard";
     }
 
     @GetMapping("/player-streaks/{playerId}")
@@ -279,21 +318,5 @@ public class ActionController {
         return actionService.calculatePlayerStreaks(playerId);
     }
 
-    @GetMapping("/api/players/club/{clubId}")
-    @ResponseBody
-    public List<PlayerDTO> getPlayersByClub(@PathVariable Long clubId) {
-        return playerService.getPlayersByClub(clubId)
-                .stream()
-                .map(p -> new PlayerDTO(
-                        p.getId(),
-                        p.getName(),
-                        p.getNationality(),
-                        p.getFlagPath(),
-                        p.getDateOfBirth(),
-                        p.getPosition(),
-                        p.getShirtNumber(),
-                        p.getClub().getId()
-                ))
-                .toList();
-    }
+
 }

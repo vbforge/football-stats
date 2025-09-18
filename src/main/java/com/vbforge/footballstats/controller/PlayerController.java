@@ -300,6 +300,24 @@ public class PlayerController {
         }
     }
 
+    @GetMapping("/club/{clubId}")
+    @ResponseBody
+    public List<PlayerDTO> getPlayersByClub(@PathVariable Long clubId) {
+        return playerService.getPlayersByClub(clubId)
+                .stream()
+                .map(p -> new PlayerDTO(
+                        p.getId(),
+                        p.getName(),
+                        p.getNationality(),
+                        p.getFlagPath(),
+                        p.getDateOfBirth(),
+                        p.getPosition(),
+                        p.getShirtNumber(),
+                        p.getClub().getId()
+                ))
+                .toList();
+    }
+
 
 
     /**

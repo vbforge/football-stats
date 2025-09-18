@@ -378,7 +378,7 @@
                         <a href="/league" class="btn btn-outline-secondary">
                             <i class="fas fa-table me-2"></i>Back to League Table
                         </a>
-                        <a th:href="@{/templates/actions_stats/club/{id}(id=${club.id})}"
+                        <a th:href="@{/templates/actions/club/{id}(id=${club.id})}"
                            class="btn btn-outline-info"
                            th:classappend="${selectedClubId == club.id} ? ' active' : ''">
                             <i class="fas fa-chart-bar me-2"></i>
