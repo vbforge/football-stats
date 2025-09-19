@@ -2,6 +2,7 @@ package com.vbforge.footballstats.controller;
 
 import com.vbforge.footballstats.dto.action.PlayerStatisticsDTO;
 import com.vbforge.footballstats.dto.player.PlayerDTO;
+import com.vbforge.footballstats.entity.City;
 import com.vbforge.footballstats.entity.Club;
 import com.vbforge.footballstats.entity.Player;
 import com.vbforge.footballstats.entity.Season;
@@ -110,8 +111,6 @@ public class PlayerController {
         }
     }
 
-
-
     // View player details
     @GetMapping("/{id}")
     public String viewPlayer(@PathVariable Long id, Model model) {
@@ -121,7 +120,7 @@ public class PlayerController {
 
             model.addAttribute("player", player);
             model.addAttribute("playerStats", playerStats);
-            return "players/player_detail";
+            return "/players/player_detail";
         } catch (EntityNotFoundException e) {
             model.addAttribute("errorMessage", "Player not found");
             return "redirect:/league";
@@ -259,7 +258,9 @@ public class PlayerController {
             Map<Player.Position, List<Player>> playersByPosition = players.stream()
                     .collect(Collectors.groupingBy(Player::getPosition));
 
+
             model.addAttribute("club", club);
+            model.addAttribute("city", club.getCity().getName());
             model.addAttribute("players", players);
             model.addAttribute("goalkeepers", playersByPosition.getOrDefault(Player.Position.GOALKEEPER, List.of()));
             model.addAttribute("defenders", playersByPosition.getOrDefault(Player.Position.DEFENDER, List.of()));

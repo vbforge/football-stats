@@ -274,7 +274,6 @@
                 </div>
                 <div class="col-md-2">
                     <strong>Best Game</strong><br>
-<!--                    <span class="text-warning fs-5" th:text="${actions.stream().mapToInt(action -> action.totalPoints).max().orElse(0)}">0</span>-->
                     <span class="text-warning fs-5" th:text="${totalPoints}">0</span>
                 </div>
             </div>
@@ -294,10 +293,6 @@
                             <div class="col-md-6">
                                 <small class="text-muted">Goal-Scoring Form:</small>
                                 <div class="progress mb-2" style="height: 20px;">
-<!--                                    <div class="progress-bar bg-success"-->
-<!--                                         th:style="'width: ' + (${totalGoals > 0 ? (totalGoals * 100.0 / (#lists.size(actions) * 3)) : 0}) + '%'"-->
-<!--                                         th:text="${totalGoals > 0 ? (#numbers.formatDecimal(totalGoals * 100.0 / (#lists.size(actions) * 3), 1, 1) + '%') : '0%'}">-->
-<!--                                    </div>-->
                                     <div class="progress-bar bg-success"
                                          th:style="'width: ' + (${totalPoints > 0 ? 100 : 0}) + '%'"
                                          th:text="${totalPoints > 0 ? '100%' : '0%'}">

@@ -123,9 +123,14 @@
                         <i class="fas fa-users me-1"></i><span th:text="${players != null ? players.size() : 0}">0</span> Players
                     </span>
 
-                    <span th:if="${club != null} and ${club.city != null}" class="badge info-badge">
-                        <i class="fas fa-map-marker-alt me-1"></i><span th:text="${club.city}"></span>
-                    </span>
+<!--                    <span th:if="${club != null} and ${club.city != null}" class="badge info-badge">-->
+<!--                        <i class="fas fa-map-marker-alt me-1"></i><span th:text="${club.city}"></span>-->
+<!--                    </span>-->
+
+                    <span th:if="${city}" class="badge info-badge">
+                            <i class="fas fa-map-marker-alt me-1"></i><span th:text="${city}"></span>
+                        </span>
+
                 </div>
                 <div class="d-flex gap-2 mt-2">
                     <a th:href="${club != null ? '/clubs/' + club.id : '/league'}" class="btn btn-light">
