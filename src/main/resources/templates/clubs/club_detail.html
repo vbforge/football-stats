@@ -90,11 +90,11 @@
             <span th:text="${seasonName}">Premier League</span>
         </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/actions"><i class="fas fa-plus me-1"></i>Player Action</a>
-            <a class="nav-link" href="/players/statistics"><i class="fas fa-chart-bar me-1"></i>Players Statistics</a>
-            <a class="nav-link" href="/games"><i class="fas fa-futbol me-1"></i>Games Management</a>
-            <!--            <a class="nav-link" href="/games/add"><i class="fas fa-plus me-1"></i>Game</a>-->
-            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League Table</a>
+            <a class="nav-link" href="/actions/manage"><i class="fas fa-cogs me-1"></i>Manage Actions</a>
+            <a class="nav-link" href="/actions/streaks"><i class="fas fa-fire me-1"></i>Streaks Leaderboard</a>
+            <a class="nav-link" href="/actions"><i class="fas fa-futbol me-1"></i>Goals & Assists</a>
+            <a class="nav-link" href="/games"><i class="fas fa-calendar-alt me-1"></i>Games</a>
+            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League</a>
             <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>
         </div>
     </div>
@@ -378,16 +378,16 @@
                         <a href="/league" class="btn btn-outline-secondary">
                             <i class="fas fa-table me-2"></i>Back to League Table
                         </a>
-                        <a th:href="@{/templates/actions/club/{id}(id=${club.id})}"
+                        <a th:href="@{/actions/statistics/club/{id}(id=${club.id})}"
                            class="btn btn-outline-info"
                            th:classappend="${selectedClubId == club.id} ? ' active' : ''">
                             <i class="fas fa-chart-bar me-2"></i>
                             <span th:text="${club.name + ' Players Statistics'}">Club Players Statistics</span>
                         </a>
-                        <a href="/statistics" class="btn btn-outline-info">
+                        <a href="/actions" class="btn btn-outline-info">
                             <i class="fas fa-chart-bar me-2"></i>All Players Statistics
                         </a>
-                        <a th:href="@{${club.id} + '/squad'}" class="btn btn-outline-primary">
+                        <a th:href="@{'/players/club/' + ${club.id} + '/squad'}" class="btn btn-outline-primary">
                             <i class="fas fa-users me-2"></i>
                             <span th:text="${club.name + ' Squad'}">Club Squad</span>
                         </a>

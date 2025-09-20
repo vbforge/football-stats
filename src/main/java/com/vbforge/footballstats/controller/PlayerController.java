@@ -114,6 +114,8 @@ public class PlayerController {
     // View player details
     @GetMapping("/{id}")
     public String viewPlayer(@PathVariable Long id, Model model) {
+        Season season = seasonService.getCurrentSeason().orElseThrow();
+        model.addAttribute("seasonName", season.getName());
         try {
             Player player = playerService.getPlayerById(id);
             PlayerStatisticsDTO playerStats = playerService.getPlayerDetail(id);

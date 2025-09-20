@@ -20,18 +20,15 @@ public class ActionServiceImpl implements ActionService {
 
     private final SeasonRepository seasonRepository;
     private final MatchDayRepository matchDayRepository;
-    private final ClubRepository clubRepository;
     private final PlayerRepository playerRepository;
     private final ActionRepository actionRepository;
 
     public ActionServiceImpl(SeasonRepository seasonRepository,
                              MatchDayRepository matchDayRepository,
-                             ClubRepository clubRepository,
                              PlayerRepository playerRepository,
                              ActionRepository actionRepository) {
         this.seasonRepository = seasonRepository;
         this.matchDayRepository = matchDayRepository;
-        this.clubRepository = clubRepository;
         this.playerRepository = playerRepository;
         this.actionRepository = actionRepository;
     }
@@ -39,9 +36,21 @@ public class ActionServiceImpl implements ActionService {
     @Override
     @Transactional
     public void saveAction(ActionFormDTO actionForm) {
+        // Validate required fields
+        if (actionForm.getPlayerId() == null) {
+            throw new IllegalArgumentException("Player ID is required");
+        }
+        if (actionForm.getMatchDayNumber() == null) {
+            throw new IllegalArgumentException("Match day number is required");
+        }
+
         // Get current season
         Season currentSeason = seasonRepository.findByIsCurrentTrue()
                 .orElseThrow(() -> new IllegalStateException("No current season is set"));
+
+        // Get player
+        Player player = playerRepository.findById(actionForm.getPlayerId())
+                .orElseThrow(() -> new EntityNotFoundException("Player not found with id: " + actionForm.getPlayerId()));
 
         // Get or create match day for current season
         MatchDay matchDay = matchDayRepository.findByNumberAndSeason(actionForm.getMatchDayNumber(), currentSeason)
@@ -52,37 +61,22 @@ public class ActionServiceImpl implements ActionService {
                     return matchDayRepository.save(newMatchDay);
                 });
 
-        Player player;
-        if (actionForm.isNewPlayer()) {
-            // Create new player - but first validate club exists
-            Club club = clubRepository.findByName(actionForm.getClubName())
-                    .orElseThrow(() -> new IllegalArgumentException("Club not found: " + actionForm.getClubName()));
-
-            player = new Player();
-            player.setName(actionForm.getPlayerName());
-            player.setClub(club);
-            player = playerRepository.save(player);
-        } else {
-            player = playerRepository.findById(actionForm.getPlayerId())
-                    .orElseThrow(() -> new RuntimeException("Player not found"));
-        }
-
         // Check if action already exists for this player and match day
         Action existingAction = actionRepository.findByPlayerIdAndMatchDayId(player.getId(), matchDay.getId())
                 .orElse(null);
 
         if (existingAction != null) {
             // Update existing action
-            existingAction.setGoals(actionForm.getGoals());
-            existingAction.setAssists(actionForm.getAssists());
+            existingAction.setGoals(actionForm.getGoals() != null ? actionForm.getGoals() : 0);
+            existingAction.setAssists(actionForm.getAssists() != null ? actionForm.getAssists() : 0);
             actionRepository.save(existingAction);
         } else {
             // Create new action
             Action action = new Action();
             action.setPlayer(player);
             action.setMatchDay(matchDay);
-            action.setGoals(actionForm.getGoals());
-            action.setAssists(actionForm.getAssists());
+            action.setGoals(actionForm.getGoals() != null ? actionForm.getGoals() : 0);
+            action.setAssists(actionForm.getAssists() != null ? actionForm.getAssists() : 0);
             actionRepository.save(action);
         }
     }
@@ -95,12 +89,14 @@ public class ActionServiceImpl implements ActionService {
 
     @Override
     @Transactional
-    public void updateAction(Action action) {
-        if (actionRepository.existsById(action.getId())) {
-            actionRepository.save(action);
-        } else {
-            throw new EntityNotFoundException("Action not found with id: " + action.getId());
-        }
+    public void updateAction(Long actionId, ActionFormDTO actionForm) {
+        Action action = getActionById(actionId);
+
+        // Update action fields
+        action.setGoals(actionForm.getGoals() != null ? actionForm.getGoals() : 0);
+        action.setAssists(actionForm.getAssists() != null ? actionForm.getAssists() : 0);
+
+        actionRepository.save(action);
     }
 
     @Override
@@ -127,49 +123,6 @@ public class ActionServiceImpl implements ActionService {
     public Action findActionByPlayerAndMatchDay(Long playerId, Long matchDayId) {
         return actionRepository.findByPlayerIdAndMatchDayId(playerId, matchDayId).orElse(null);
     }
-
-    @Override
-    public ActionFormDTO getActionFormForEdit(Long actionId) {
-        Action action = getActionById(actionId);
-
-        ActionFormDTO form = new ActionFormDTO();
-        form.setPlayerId(action.getPlayer().getId());
-        form.setPlayerName(action.getPlayer().getName());
-        form.setClubName(action.getPlayer().getClub().getName());
-        form.setMatchDayNumber(action.getMatchDay().getNumber());
-        form.setGoals(action.getGoals());
-        form.setAssists(action.getAssists());
-        form.setNewPlayer(false);
-
-        return form;
-    }
-
-    @Override
-    @Transactional
-    public void updateActionFromForm(ActionFormDTO actionForm) {
-        if (actionForm.getPlayerId() == null) {
-            throw new IllegalArgumentException("Player ID is required for updating action");
-        }
-
-        // Get current season
-        Season currentSeason = seasonRepository.findByIsCurrentTrue()
-                .orElseThrow(() -> new IllegalStateException("No current season is set"));
-
-        // Get match day
-        MatchDay matchDay = matchDayRepository.findByNumberAndSeason(actionForm.getMatchDayNumber(), currentSeason)
-                .orElseThrow(() -> new EntityNotFoundException("Match day not found"));
-
-        // Find existing action
-        Action action = actionRepository.findByPlayerIdAndMatchDayId(actionForm.getPlayerId(), matchDay.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Action not found for player and match day"));
-
-        // Update action
-        action.setGoals(actionForm.getGoals());
-        action.setAssists(actionForm.getAssists());
-
-        actionRepository.save(action);
-    }
-
 
     @Override
     public List<PlayerStatisticsDTO> getAllPlayerStatistics() {
@@ -272,32 +225,6 @@ public class ActionServiceImpl implements ActionService {
         };
     }
 
-
-
-    @Override
-    public List<PlayerStatsDTO> getClubTopScorers(Long clubId, int limit) {
-        List<PlayerStatisticsDTO> playerStats = getPlayerStatisticsByClub(clubId);
-
-        return playerStats.stream()
-                .filter(p -> p.getTotalGoals() != null && p.getTotalGoals() > 0)
-                .sorted((p1, p2) -> Integer.compare(p2.getTotalGoals(), p1.getTotalGoals()))
-                .limit(limit)
-                .map(PlayerStatsDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<PlayerStatsDTO> getClubTopAssisters(Long clubId, int limit) {
-        List<PlayerStatisticsDTO> playerStats = getPlayerStatisticsByClub(clubId);
-
-        return playerStats.stream()
-                .filter(p -> p.getTotalAssists() != null && p.getTotalAssists() > 0)
-                .sorted((p1, p2) -> Integer.compare(p2.getTotalAssists(), p1.getTotalAssists()))
-                .limit(limit)
-                .map(PlayerStatsDTO::new)
-                .collect(Collectors.toList());
-    }
-
     @Override
     public StreakResultDTO calculatePlayerStreaks(Long playerId) {
         List<Action> actions = actionRepository.findByPlayerIdOrderByMatchDay(playerId);
@@ -362,6 +289,30 @@ public class ActionServiceImpl implements ActionService {
                     dto.setStreakType("ASSISTS");
                     return dto;
                 })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayerStatsDTO> getClubTopScorers(Long clubId, int limit) {
+        List<PlayerStatisticsDTO> playerStats = getPlayerStatisticsByClub(clubId);
+
+        return playerStats.stream()
+                .filter(p -> p.getTotalGoals() != null && p.getTotalGoals() > 0)
+                .sorted((p1, p2) -> Integer.compare(p2.getTotalGoals(), p1.getTotalGoals()))
+                .limit(limit)
+                .map(PlayerStatsDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<PlayerStatsDTO> getClubTopAssisters(Long clubId, int limit) {
+        List<PlayerStatisticsDTO> playerStats = getPlayerStatisticsByClub(clubId);
+
+        return playerStats.stream()
+                .filter(p -> p.getTotalAssists() != null && p.getTotalAssists() > 0)
+                .sorted((p1, p2) -> Integer.compare(p2.getTotalAssists(), p1.getTotalAssists()))
+                .limit(limit)
+                .map(PlayerStatsDTO::new)
                 .collect(Collectors.toList());
     }
 

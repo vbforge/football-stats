@@ -1,9 +1,11 @@
 package com.vbforge.footballstats.controller;
 
+import com.vbforge.footballstats.dto.action.PlayerStatsDTO;
 import com.vbforge.footballstats.dto.club.ClubDetailDTO;
 import com.vbforge.footballstats.entity.City;
 import com.vbforge.footballstats.entity.Club;
 
+import com.vbforge.footballstats.entity.Player;
 import com.vbforge.footballstats.entity.Season;
 import com.vbforge.footballstats.service.CityService;
 import com.vbforge.footballstats.service.ClubService;
@@ -14,6 +16,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/clubs")
@@ -41,6 +45,7 @@ public class ClubController {
             model.addAttribute("club", club);
             City city = cityService.findCityByClubId(id).orElseThrow();
             model.addAttribute("city", city.getName());
+
             return "clubs/club_detail";
         } catch (EntityNotFoundException e) {
             model.addAttribute("errorMessage", "Club not found");

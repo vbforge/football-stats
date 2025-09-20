@@ -20,7 +20,6 @@
             <span th:text="${seasonName}">Premier League</span>
         </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/actions/add"><i class="fas fa-plus me-1"></i>Player Action</a>
             <a class="nav-link" href="/actions/manage"><i class="fas fa-cogs me-1"></i>Manage Actions</a>
             <a class="nav-link" href="/actions/streaks"><i class="fas fa-fire me-1"></i>Streaks Leaderboard</a>
             <a class="nav-link" href="/actions"><i class="fas fa-futbol me-1"></i>Goals & Assists</a>
@@ -32,9 +31,11 @@
 </nav>
 
 <div class="container mt-4">
+
     <!-- Controls Row -->
-    <div class="row mb-4">
-        <div class="col-md-6">
+    <div class="row mb-4 align-items-center">
+        <!-- Filter Dropdown -->
+        <div class="col-md-4">
             <div class="dropdown">
                 <button class="btn btn-outline-primary dropdown-toggle" type="button"
                         data-bs-toggle="dropdown">
@@ -42,9 +43,7 @@
                 </button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="/actions/statistics">All Clubs</a></li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
+                    <li><hr class="dropdown-divider"></li>
                     <li th:each="club : ${clubs}">
                         <a class="dropdown-item"
                            th:href="@{/actions/statistics/club/{id}(id=${club.id})}"
@@ -54,7 +53,20 @@
                 </ul>
             </div>
         </div>
-        <div class="col-md-6 text-end">
+
+        <!-- Legend -->
+        <div class="col-md-4 text-center">
+            <strong>
+            <small>
+                <i class="fas fa-futbol text-success me-1"></i> Goals = 3 pts &nbsp;|&nbsp;
+                <i class="fas fa-hands-helping text-info me-1"></i> Assists = 1 pt &nbsp;|&nbsp;
+                <i class="fas fa-calculator text-warning me-1"></i> Total = (G × 3) + A
+            </small>
+            </strong>
+        </div>
+
+        <!-- Page Size Controls -->
+        <div class="col-md-4 text-end">
             <div class="btn-group" role="group">
                 <input type="radio" class="btn-check" name="pageSize" id="size10" value="10"
                        th:checked="${pageSize == 10}">
@@ -71,26 +83,8 @@
         </div>
     </div>
 
-    <!-- Point System Info -->
-    <div class="alert alert-info" role="alert">
-        <div class="row text-center">
-            <div class="col-md-4">
-                <i class="fas fa-futbol text-success me-1"></i>
-                <strong>Goals = 3 points</strong>
-            </div>
-            <div class="col-md-4">
-                <i class="fas fa-hands-helping text-info me-1"></i>
-                <strong>Assists = 1 point</strong>
-            </div>
-            <div class="col-md-4">
-                <i class="fas fa-calculator text-warning me-1"></i>
-                <strong>Total = (Goals × 3) + Assists</strong>
-            </div>
-        </div>
-    </div>
-
     <!-- Summary Cards -->
-    <div class="row mt-4">
+    <div class="row g-3">
         <div class="col-md-3">
             <div class="card stats-card bg-success text-white">
                 <div class="card-body text-center">

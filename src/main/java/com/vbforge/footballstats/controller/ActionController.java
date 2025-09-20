@@ -100,21 +100,13 @@ public class ActionController {
         return "actions/action_statistics";
     }
 
-//    // Main action form page
-//    @GetMapping("/add")
-//    public String action(Model model) {
-//        Season season = seasonService.getCurrentSeason().orElseThrow();
-//        model.addAttribute("seasonName", season.getName());
-//        model.addAttribute("actionForm", new ActionFormDTO());
-//        model.addAttribute("clubs", clubService.getAllClubs());
-//        model.addAttribute("players", playerService.getAllPlayers());
-//        return "actions/action_add";
-//    }
-
     @GetMapping("/add")
     public String action(@RequestParam(required = false) Integer matchDay,
                          @RequestParam(required = false) Long playerId,
                          Model model) {
+
+        model.addAttribute("editMode", Boolean.FALSE);
+
         Season season = seasonService.getCurrentSeason().orElseThrow();
         model.addAttribute("seasonName", season.getName());
 
@@ -139,7 +131,7 @@ public class ActionController {
         try {
             actionService.saveAction(actionForm);
             redirectAttributes.addFlashAttribute("success",
-                    "Action added successfully for " + actionForm.getPlayerName());
+                    "Action added successfully for player ID: " + actionForm.getPlayerId());
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error",
                     "Error adding action: " + e.getMessage());
@@ -179,37 +171,45 @@ public class ActionController {
     @GetMapping("/edit/{actionId}")
     public String editActionForm(@PathVariable Long actionId, Model model) {
         try {
-            ActionFormDTO actionForm = actionService.getActionFormForEdit(actionId);
+            Action action = actionService.getActionById(actionId);
             Season season = seasonService.getCurrentSeason().orElseThrow();
 
+            ActionFormDTO actionForm = new ActionFormDTO();
+            actionForm.setPlayerId(action.getPlayer().getId());
+            actionForm.setMatchDayNumber(action.getMatchDay().getNumber());
+            actionForm.setGoals(action.getGoals());
+            actionForm.setAssists(action.getAssists());
+
+            model.addAttribute("editMode", Boolean.FALSE);
             model.addAttribute("seasonName", season.getName());
             model.addAttribute("actionForm", actionForm);
             model.addAttribute("actionId", actionId);
             model.addAttribute("clubs", clubService.getAllClubs());
             model.addAttribute("players", playerService.getAllPlayers());
             model.addAttribute("editMode", true);
+            model.addAttribute("selectedPlayer", action.getPlayer());
 
             return "actions/action_add";
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Action not found: " + e.getMessage());
-            return "redirect:/actions/actions_statistics";
+            return "redirect:/actions";
         }
     }
 
-    // Update existing action
+    // Update existing action - Fixed method signature and implementation
     @PostMapping("/update/{actionId}")
     public String updateAction(@PathVariable Long actionId,
                                @ModelAttribute ActionFormDTO actionForm,
                                RedirectAttributes redirectAttributes) {
         try {
-            actionService.updateActionFromForm(actionForm);
+            actionService.updateAction(actionId, actionForm);
             redirectAttributes.addFlashAttribute("success",
-                    "Action updated successfully for " + actionForm.getPlayerName());
+                    "Action updated successfully");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error",
                     "Error updating action: " + e.getMessage());
         }
-        return "redirect:/actions/actions_statistics";
+        return "redirect:/actions";
     }
 
     // Delete action
@@ -228,7 +228,7 @@ public class ActionController {
             redirectAttributes.addFlashAttribute("error",
                     "Error deleting action: " + e.getMessage());
         }
-        return "redirect:/actions/actions_statistics";
+        return "redirect:/actions";
     }
 
     // View all actions for a player
@@ -279,13 +279,10 @@ public class ActionController {
             model.addAttribute("totalGoals", totalGoals);
             model.addAttribute("totalAssists", totalAssists);
             model.addAttribute("totalPoints", totalPoints);
-            model.addAttribute("actions", actions);
         }
 
         return "actions/actions_management";
     }
-
-
 
     @GetMapping("/statistics/club/{clubId}")
     public String viewClubStatistics(@PathVariable Long clubId,
@@ -335,6 +332,4 @@ public class ActionController {
                 ))
                 .toList();
     }
-
-
 }
