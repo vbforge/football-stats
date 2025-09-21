@@ -47,6 +47,7 @@ public interface ActionService {
 
     // Statistics operations
     List<PlayerStatisticsDTO> getAllPlayerStatistics();
+    List<PlayerStatisticsDTO> getAllBestPlayerStatistics();
     List<PlayerStatisticsDTO> getPlayerStatisticsByClub(Long clubId);
     Page<PlayerStatisticsDTO> getPlayerStatisticsPaginated(int page, int size, String sortBy, String sortDir);
     Page<PlayerStatisticsDTO> getPlayerStatisticsByClubPaginated(Long clubId, int page, int size, String sortBy, String sortDir);

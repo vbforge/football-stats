@@ -40,7 +40,7 @@ public class ActionController {
         this.seasonService = seasonService;
     }
 
-    // FIXED: Updated route mapping to match HTML links
+    //new impl for separating filtering by club and global:
     @GetMapping({"/statistics", ""})
     public String viewActions(@RequestParam(defaultValue = "0") int page,
                               @RequestParam(defaultValue = "10") int size,
@@ -81,20 +81,41 @@ public class ActionController {
         model.addAttribute("totalPoints", totalPoints);
         model.addAttribute("activePlayers", statsPage.getTotalElements());
 
-        // Top performers from current page (for performance display)
-        List<PlayerStatisticsDTO> pageStats = statsPage.getContent();
-        List<PlayerStatisticsDTO> topScorers = pageStats.stream()
-                .filter(stat -> stat.getTotalGoals() > 0)
-                .sorted((a, b) -> b.getTotalGoals().compareTo(a.getTotalGoals()))
-                .limit(5)
-                .collect(Collectors.toList());
-        model.addAttribute("topScorers", topScorers);
+        // FIXED: Top performers from ALL statistics, not just current page
+        List<PlayerStatisticsDTO> topScorers;
+        List<PlayerStatisticsDTO> topAssistProviders;
 
-        List<PlayerStatisticsDTO> topAssistProviders = pageStats.stream()
-                .filter(stat -> stat.getTotalAssists() > 0)
-                .sorted((a, b) -> b.getTotalAssists().compareTo(a.getTotalAssists()))
-                .limit(5)
-                .collect(Collectors.toList());
+        if (clubId != null) {
+            // For club filtering, use club-specific statistics
+            topScorers = allStats.stream()
+                    .filter(stat -> stat.getTotalGoals() > 0)
+                    .sorted((a, b) -> b.getTotalGoals().compareTo(a.getTotalGoals()))
+                    .limit(10)
+                    .collect(Collectors.toList());
+
+            topAssistProviders = allStats.stream()
+                    .filter(stat -> stat.getTotalAssists() > 0)
+                    .sorted((a, b) -> b.getTotalAssists().compareTo(a.getTotalAssists()))
+                    .limit(10)
+                    .collect(Collectors.toList());
+        } else {
+            // For global view, use getAllBestPlayerStatistics for better performance
+            List<PlayerStatisticsDTO> globalStats = actionService.getAllBestPlayerStatistics();
+
+            topScorers = globalStats.stream()
+                    .filter(stat -> stat.getTotalGoals() > 0)
+                    .sorted((a, b) -> b.getTotalGoals().compareTo(a.getTotalGoals()))
+                    .limit(10)
+                    .collect(Collectors.toList());
+
+            topAssistProviders = globalStats.stream()
+                    .filter(stat -> stat.getTotalAssists() > 0)
+                    .sorted((a, b) -> b.getTotalAssists().compareTo(a.getTotalAssists()))
+                    .limit(10)
+                    .collect(Collectors.toList());
+        }
+
+        model.addAttribute("topScorers", topScorers);
         model.addAttribute("topAssistProviders", topAssistProviders);
 
         // Pagination attributes

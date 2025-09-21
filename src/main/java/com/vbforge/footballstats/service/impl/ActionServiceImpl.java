@@ -147,6 +147,23 @@ public class ActionServiceImpl implements ActionService {
     }
 
     @Override
+    public List<PlayerStatisticsDTO> getAllBestPlayerStatistics() {
+        List<Object[]> results = actionRepository.getPlayerStatistics();
+        return results.stream()
+                .map(result -> {
+                    return new PlayerStatisticsDTO(
+                            (Long) result[0],      // playerId
+                            (String) result[1],    // playerName
+                            (String) result[2],    // clubName
+                            (Long) result[3],      // totalGoals
+                            (Long) result[4],      // totalAssists
+                            (Long) result[5]       // totalPoints (now weighted)
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<PlayerStatisticsDTO> getPlayerStatisticsByClub(Long clubId) {
         List<Object[]> results = actionRepository.getPlayerStatisticsByClub(clubId);
         return results.stream()
