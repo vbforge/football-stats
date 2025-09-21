@@ -1,3 +1,293 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title th:text="${club != null ? club.name + ' Squad' : 'Squad'} + ' - Football Stats'">Squad - Football Stats</title>-->
+<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">-->
+<!--    <link rel="stylesheet" href="/css/index_navbar.css">-->
+<!--    <style>-->
+<!--        .club-header {-->
+<!--            background: linear-gradient(135deg, var(&#45;&#45;primary-color, #007bff) 0%, var(&#45;&#45;secondary-color, #0056b3) 100%);-->
+<!--            color: white;-->
+<!--            padding: 2rem 0;-->
+<!--        }-->
+
+<!--        .club-logo-large {-->
+<!--            width: 60px;-->
+<!--            height: 60px;-->
+<!--            object-fit: contain;-->
+<!--            background: white;-->
+<!--            border-radius: 8px;-->
+<!--            padding: 8px;-->
+<!--            box-shadow: 0 4px 8px rgba(0,0,0,0.1);-->
+<!--        }-->
+
+<!--        .player-card {-->
+<!--            border: none;-->
+<!--            box-shadow: 0 2px 8px rgba(0,0,0,0.1);-->
+<!--            transition: all 0.2s ease;-->
+<!--            height: 100%;-->
+<!--        }-->
+
+<!--        .player-card:hover {-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: 0 4px 15px rgba(0,0,0,0.2);-->
+<!--        }-->
+
+<!--        .position-badge {-->
+<!--            font-size: 0.75rem;-->
+<!--            padding: 0.25rem 0.5rem;-->
+<!--        }-->
+
+<!--        .position-gk { background: #6f42c1; }-->
+<!--        .position-def { background: #198754; }-->
+<!--        .position-mid { background: #ffc107; color: #000; }-->
+<!--        .position-fwd { background: #dc3545; }-->
+
+<!--        .player-number {-->
+<!--            width: 40px;-->
+<!--            height: 40px;-->
+<!--            border-radius: 50%;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            justify-content: center;-->
+<!--            font-weight: bold;-->
+<!--            background: rgba(255,255,255,0.1);-->
+<!--            color: white;-->
+<!--            margin-right: 1rem;-->
+<!--        }-->
+
+<!--        .flag-icon {-->
+<!--            width: 20px;-->
+<!--            height: 15px;-->
+<!--            object-fit: cover;-->
+<!--            border-radius: 2px;-->
+<!--        }-->
+
+<!--        .info-badge {-->
+<!--            background: rgba(255,255,255,0.2);-->
+<!--            color: white;-->
+<!--            border: 1px solid rgba(255,255,255,0.3);-->
+<!--            backdrop-filter: blur(10px);-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--&lt;!&ndash; Navbar &ndash;&gt;-->
+<!--<nav class="navbar navbar-expand-lg navbar-light bg-dark shadow-sm">-->
+<!--    <div class="container">-->
+<!--        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="/">-->
+<!--            <img src="/images/logos/pl-logo-dark.svg" alt="Football Stats Logo" class="me-2">-->
+<!--            <span th:text="${seasonName}">Premier League</span>-->
+<!--        </a>-->
+<!--        <div class="navbar-nav ms-auto">-->
+<!--            <a class="nav-link" href="/actions/manage"><i class="fas fa-cogs me-1"></i>Manage Actions</a>-->
+<!--            <a class="nav-link" href="/actions/streaks"><i class="fas fa-fire me-1"></i>Streaks Leaderboard</a>-->
+<!--            <a class="nav-link" href="/actions"><i class="fas fa-futbol me-1"></i>Goals & Assists</a>-->
+<!--            <a class="nav-link" href="/games"><i class="fas fa-calendar-alt me-1"></i>Games</a>-->
+<!--            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League</a>-->
+<!--            <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</nav>-->
+
+<!--&lt;!&ndash; Flash Messages &ndash;&gt;-->
+<!--<div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show m-3" role="alert">-->
+<!--    <i class="fas fa-check-circle me-2"></i>-->
+<!--    <span th:text="${successMessage}"></span>-->
+<!--    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; Club Header &ndash;&gt;-->
+<!--<div class="club-header" th:style="${club != null && club.primaryColor != null ? 'background: linear-gradient(135deg, ' + club.primaryColor + ' 0%, ' + (club.secondaryColor ?: club.primaryColor) + ' 100%);' : ''}">-->
+<!--    <div class="container">-->
+<!--        <div class="row align-items-center">-->
+<!--            <div class="col-auto" th:if="${club != null}">-->
+<!--                <img th:src="${club.logoPath}"-->
+<!--                     th:alt="${club.name + ' logo'}"-->
+<!--                     class="club-logo-large"-->
+<!--                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">-->
+<!--                <div class="club-logo-large d-none align-items-center justify-content-center" style="display: none;">-->
+<!--                    <i class="fas fa-shield-alt fa-2x text-muted"></i>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="col">-->
+<!--                <h1 class="display-6 mb-2">-->
+<!--                    <span th:text="${club != null ? club.name : 'All Players'}">Squad</span>-->
+<!--                    <small class="text-light"> Squad</small>-->
+<!--                </h1>-->
+<!--                <div class="d-flex flex-wrap gap-2">-->
+<!--                    <span class="badge info-badge">-->
+<!--                        <i class="fas fa-users me-1"></i><span th:text="${players != null ? players.size() : 0}">0</span> Players-->
+<!--                    </span>-->
+
+<!--&lt;!&ndash;                    <span th:if="${club != null} and ${club.city != null}" class="badge info-badge">&ndash;&gt;-->
+<!--&lt;!&ndash;                        <i class="fas fa-map-marker-alt me-1"></i><span th:text="${club.city}"></span>&ndash;&gt;-->
+<!--&lt;!&ndash;                    </span>&ndash;&gt;-->
+
+<!--                    <span th:if="${city}" class="badge info-badge">-->
+<!--                            <i class="fas fa-map-marker-alt me-1"></i><span th:text="${city}"></span>-->
+<!--                        </span>-->
+
+<!--                </div>-->
+<!--                <div class="d-flex gap-2 mt-2">-->
+<!--                    <a th:href="${club != null ? '/clubs/' + club.id : '/league'}" class="btn btn-light">-->
+<!--                        <i class="fas fa-arrow-left me-2"></i>Back to <span th:text="${club != null ? 'Club Details' : 'League'}">Club</span>-->
+<!--                    </a>-->
+
+<!--                    <a href="/league" class="btn btn-outline-light">-->
+<!--                        <i class="fas fa-arrow-up me-2"></i>Back to League-->
+<!--                    </a>-->
+
+<!--                    <a th:href="@{'/players/club/' + ${club.id} + '/squad/manage'}" class="btn btn-outline-light">-->
+<!--                        <i class="fas fa-users-cog me-2"></i>Squad Management-->
+<!--                    </a>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<div class="container mt-4">-->
+<!--    &lt;!&ndash; Squad Grid &ndash;&gt;-->
+<!--    <div class="row">-->
+<!--        &lt;!&ndash; Goalkeepers &ndash;&gt;-->
+<!--        <div class="col-12">-->
+<!--            <h4 class="mb-3"><i class="fas fa-hand-paper text-purple me-2"></i>Goalkeepers</h4>-->
+<!--            <div class="row mb-4">-->
+<!--                <div th:each="player : ${goalkeepers}" class="col-lg-4 col-md-6 mb-3">-->
+<!--                    <div class="card player-card">-->
+<!--                        <div class="card-body">-->
+<!--                            <div class="d-flex align-items-center mb-2">-->
+<!--                                <div class="player-number bg-purple text-white" th:text="${player.shirtNumber ?: '?'}">1</div>-->
+<!--                                <div class="flex-grow-1">-->
+<!--                                    <a th:href="@{'/players/' + ${player.id}}" class="text-decoration-none">-->
+<!--                                        <h6 class="card-title mb-1" th:text="${player.name}">Player Name</h6>-->
+<!--                                    </a>-->
+<!--                                    <span class="badge position-badge position-gk">GK</span>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="d-flex justify-content-between align-items-center">-->
+<!--                                <div class="d-flex align-items-center">-->
+<!--                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}" -->
+<!--                                         th:alt="${player.nationality}" class="flag-icon me-1">-->
+<!--                                    <small class="text-muted" th:text="${player.nationality ?: 'Unknown'}">Nationality</small>-->
+<!--                                </div>-->
+<!--                                <small class="text-muted" th:text="${player.dateOfBirth != null ? #temporals.format(player.dateOfBirth, 'dd/MM/yyyy') : ''}">01/01/1990</small>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Defenders &ndash;&gt;-->
+<!--        <div class="col-12">-->
+<!--            <h4 class="mb-3"><i class="fas fa-shield-alt text-success me-2"></i>Defenders</h4>-->
+<!--            <div class="row mb-4">-->
+<!--                <div th:each="player : ${defenders}" class="col-lg-4 col-md-6 mb-3">-->
+<!--                    <div class="card player-card">-->
+<!--                        <div class="card-body">-->
+<!--                            <div class="d-flex align-items-center mb-2">-->
+<!--                                <div class="player-number bg-success text-white" th:text="${player.shirtNumber ?: '?'}">2</div>-->
+<!--                                <div class="flex-grow-1">-->
+<!--                                    <a th:href="@{'/players/' + ${player.id}}" class="text-decoration-none">-->
+<!--                                        <h6 class="card-title mb-1" th:text="${player.name}">Player Name</h6>-->
+<!--                                    </a>-->
+<!--                                    <span class="badge position-badge position-def">DEF</span>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="d-flex justify-content-between align-items-center">-->
+<!--                                <div class="d-flex align-items-center">-->
+<!--                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}" -->
+<!--                                         th:alt="${player.nationality}" class="flag-icon me-1">-->
+<!--                                    <small class="text-muted" th:text="${player.nationality ?: 'Unknown'}">Nationality</small>-->
+<!--                                </div>-->
+<!--                                <small class="text-muted" th:text="${player.dateOfBirth != null ? #temporals.format(player.dateOfBirth, 'dd/MM/yyyy') : ''}">01/01/1990</small>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Midfielders &ndash;&gt;-->
+<!--        <div class="col-12">-->
+<!--            <h4 class="mb-3"><i class="fas fa-running text-warning me-2"></i>Midfielders</h4>-->
+<!--            <div class="row mb-4">-->
+<!--                <div th:each="player : ${midfielders}" class="col-lg-4 col-md-6 mb-3">-->
+<!--                    <div class="card player-card">-->
+<!--                        <div class="card-body">-->
+<!--                            <div class="d-flex align-items-center mb-2">-->
+<!--                                <div class="player-number bg-warning text-dark" th:text="${player.shirtNumber ?: '?'}">8</div>-->
+<!--                                <div class="flex-grow-1">-->
+<!--                                    <a th:href="@{'/players/' + ${player.id}}" class="text-decoration-none">-->
+<!--                                        <h6 class="card-title mb-1" th:text="${player.name}">Player Name</h6>-->
+<!--                                    </a>-->
+<!--                                    <span class="badge position-badge position-mid">MID</span>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="d-flex justify-content-between align-items-center">-->
+<!--                                <div class="d-flex align-items-center">-->
+<!--                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}" -->
+<!--                                         th:alt="${player.nationality}" class="flag-icon me-1">-->
+<!--                                    <small class="text-muted" th:text="${player.nationality ?: 'Unknown'}">Nationality</small>-->
+<!--                                </div>-->
+<!--                                <small class="text-muted" th:text="${player.dateOfBirth != null ? #temporals.format(player.dateOfBirth, 'dd/MM/yyyy') : ''}">01/01/1990</small>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Forwards &ndash;&gt;-->
+<!--        <div class="col-12">-->
+<!--            <h4 class="mb-3"><i class="fas fa-futbol text-danger me-2"></i>Forwards</h4>-->
+<!--            <div class="row mb-4">-->
+<!--                <div th:each="player : ${forwards}" class="col-lg-4 col-md-6 mb-3">-->
+<!--                    <div class="card player-card">-->
+<!--                        <div class="card-body">-->
+<!--                            <div class="d-flex align-items-center mb-2">-->
+<!--                                <div class="player-number bg-danger text-white" th:text="${player.shirtNumber ?: '?'}">9</div>-->
+<!--                                <div class="flex-grow-1">-->
+<!--                                    <a th:href="@{'/players/' + ${player.id}}" class="text-decoration-none">-->
+<!--                                        <h6 class="card-title mb-1" th:text="${player.name}">Player Name</h6>-->
+<!--                                    </a>-->
+<!--                                    <span class="badge position-badge position-fwd">FWD</span>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                            <div class="d-flex justify-content-between align-items-center">-->
+<!--                                <div class="d-flex align-items-center">-->
+<!--                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}" -->
+<!--                                         th:alt="${player.nationality}" class="flag-icon me-1">-->
+<!--                                    <small class="text-muted" th:text="${player.nationality ?: 'Unknown'}">Nationality</small>-->
+<!--                                </div>-->
+<!--                                <small class="text-muted" th:text="${player.dateOfBirth != null ? #temporals.format(player.dateOfBirth, 'dd/MM/yyyy') : ''}">01/01/1990</small>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Empty State &ndash;&gt;-->
+<!--        <div th:if="${players == null || players.empty}" class="col-12">-->
+<!--            <div class="text-center py-5">-->
+<!--                <i class="fas fa-users fa-3x text-muted mb-3"></i>-->
+<!--                <h5 class="text-muted">No players found</h5>-->
+<!--                <p class="text-muted">There are no players registered for this squad.</p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -72,6 +362,11 @@
             border: 1px solid rgba(255,255,255,0.3);
             backdrop-filter: blur(10px);
         }
+
+        /* FIXED: Add proper purple background class */
+        .bg-purple {
+            background-color: #6f42c1 !important;
+        }
     </style>
 </head>
 <body>
@@ -123,13 +418,9 @@
                         <i class="fas fa-users me-1"></i><span th:text="${players != null ? players.size() : 0}">0</span> Players
                     </span>
 
-<!--                    <span th:if="${club != null} and ${club.city != null}" class="badge info-badge">-->
-<!--                        <i class="fas fa-map-marker-alt me-1"></i><span th:text="${club.city}"></span>-->
-<!--                    </span>-->
-
                     <span th:if="${city}" class="badge info-badge">
-                            <i class="fas fa-map-marker-alt me-1"></i><span th:text="${city}"></span>
-                        </span>
+                        <i class="fas fa-map-marker-alt me-1"></i><span th:text="${city}"></span>
+                    </span>
 
                 </div>
                 <div class="d-flex gap-2 mt-2">
@@ -171,7 +462,7 @@
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
-                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}" 
+                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}"
                                          th:alt="${player.nationality}" class="flag-icon me-1">
                                     <small class="text-muted" th:text="${player.nationality ?: 'Unknown'}">Nationality</small>
                                 </div>
@@ -201,7 +492,7 @@
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
-                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}" 
+                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}"
                                          th:alt="${player.nationality}" class="flag-icon me-1">
                                     <small class="text-muted" th:text="${player.nationality ?: 'Unknown'}">Nationality</small>
                                 </div>
@@ -231,7 +522,7 @@
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
-                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}" 
+                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}"
                                          th:alt="${player.nationality}" class="flag-icon me-1">
                                     <small class="text-muted" th:text="${player.nationality ?: 'Unknown'}">Nationality</small>
                                 </div>
@@ -261,7 +552,7 @@
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
-                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}" 
+                                    <img th:if="${player.flagPath}" th:src="${player.flagPath}"
                                          th:alt="${player.nationality}" class="flag-icon me-1">
                                     <small class="text-muted" th:text="${player.nationality ?: 'Unknown'}">Nationality</small>
                                 </div>
