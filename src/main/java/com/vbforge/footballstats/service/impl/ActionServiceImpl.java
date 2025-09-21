@@ -137,7 +137,7 @@ public class ActionServiceImpl implements ActionService {
                             (Long) result[4],      // totalAssists
                             (Long) result[5]       // totalPoints (now weighted)
                     );
-                    // Calculate streaks
+                    // Calculate streaks - FIXED: Now calculates true consecutive match days
                     StreakResultDTO streaks = calculatePlayerStreaks(dto.getPlayerId());
                     dto.setMaxGoalStreak(streaks.getMaxGoalStreak());
                     dto.setMaxAssistStreak(streaks.getMaxAssistStreak());
@@ -171,10 +171,13 @@ public class ActionServiceImpl implements ActionService {
     @Override
     public Page<PlayerStatisticsDTO> getPlayerStatisticsPaginated(int page, int size, String sortBy, String sortDir) {
         Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, mapSortField(sortBy)));
+
+        // Map sort field for query-level sorting
+        String mappedSortBy = mapSortField(sortBy);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, mappedSortBy));
 
         Page<Object[]> results = actionRepository.getPlayerStatisticsPaginated(pageable);
-        return results.map(result -> {
+        Page<PlayerStatisticsDTO> dtoPage = results.map(result -> {
             PlayerStatisticsDTO dto = new PlayerStatisticsDTO(
                     (Long) result[0],      // playerId
                     (String) result[1],    // playerName
@@ -189,15 +192,33 @@ public class ActionServiceImpl implements ActionService {
             dto.setMaxAssistStreak(streaks.getMaxAssistStreak());
             return dto;
         });
+
+        // For streak-based sorting, we need to sort in memory since streaks are calculated in Java
+        if ("goalStreak".equals(sortBy) || "assistStreak".equals(sortBy)) {
+            List<PlayerStatisticsDTO> content = dtoPage.getContent();
+            if ("goalStreak".equals(sortBy)) {
+                content.sort((a, b) -> direction == Sort.Direction.ASC
+                        ? a.getMaxGoalStreak().compareTo(b.getMaxGoalStreak())
+                        : b.getMaxGoalStreak().compareTo(a.getMaxGoalStreak()));
+            } else if ("assistStreak".equals(sortBy)) {
+                content.sort((a, b) -> direction == Sort.Direction.ASC
+                        ? a.getMaxAssistStreak().compareTo(b.getMaxAssistStreak())
+                        : b.getMaxAssistStreak().compareTo(a.getMaxAssistStreak()));
+            }
+        }
+
+        return dtoPage;
     }
 
     @Override
     public Page<PlayerStatisticsDTO> getPlayerStatisticsByClubPaginated(Long clubId, int page, int size, String sortBy, String sortDir) {
         Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, mapSortField(sortBy)));
+
+        String mappedSortBy = mapSortField(sortBy);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, mappedSortBy));
 
         Page<Object[]> results = actionRepository.getPlayerStatisticsByClubPaginated(clubId, pageable);
-        return results.map(result -> {
+        Page<PlayerStatisticsDTO> dtoPage = results.map(result -> {
             PlayerStatisticsDTO dto = new PlayerStatisticsDTO(
                     (Long) result[0],      // playerId
                     (String) result[1],    // playerName
@@ -212,6 +233,22 @@ public class ActionServiceImpl implements ActionService {
             dto.setMaxAssistStreak(streaks.getMaxAssistStreak());
             return dto;
         });
+
+        // For streak-based sorting, sort in memory
+        if ("goalStreak".equals(sortBy) || "assistStreak".equals(sortBy)) {
+            List<PlayerStatisticsDTO> content = dtoPage.getContent();
+            if ("goalStreak".equals(sortBy)) {
+                content.sort((a, b) -> direction == Sort.Direction.ASC
+                        ? a.getMaxGoalStreak().compareTo(b.getMaxGoalStreak())
+                        : b.getMaxGoalStreak().compareTo(a.getMaxGoalStreak()));
+            } else if ("assistStreak".equals(sortBy)) {
+                content.sort((a, b) -> direction == Sort.Direction.ASC
+                        ? a.getMaxAssistStreak().compareTo(b.getMaxAssistStreak())
+                        : b.getMaxAssistStreak().compareTo(a.getMaxAssistStreak()));
+            }
+        }
+
+        return dtoPage;
     }
 
     private String mapSortField(String sortBy) {
@@ -221,30 +258,49 @@ public class ActionServiceImpl implements ActionService {
             case "points" -> "totalPoints";
             case "name" -> "playerName";
             case "club" -> "clubName";
+            // For streak sorting, we'll use totalPoints as default and sort in memory later
+            case "goalStreak", "assistStreak" -> "totalPoints";
             default -> "totalPoints";
         };
     }
 
     @Override
     public StreakResultDTO calculatePlayerStreaks(Long playerId) {
+        // FIXED: Get all match days (1-38) and check if player had actions
         List<Action> actions = actionRepository.findByPlayerIdOrderByMatchDay(playerId);
 
-        int maxGoalStreak = 0;
-        int maxAssistStreak = 0;
-        int currentGoalStreak = 0;
-        int currentAssistStreak = 0;
+        // Create array for match days 1-38 (index 0 = match day 1)
+        boolean[] hasGoalInMatchDay = new boolean[38];
+        boolean[] hasAssistInMatchDay = new boolean[38];
 
+        // Fill arrays based on player actions
         for (Action action : actions) {
-            // Goal streak calculation
-            if (action.getGoals() > 0) {
+            int matchDayIndex = action.getMatchDay().getNumber() - 1; // Convert to 0-based index
+            if (matchDayIndex >= 0 && matchDayIndex < 38) {
+                hasGoalInMatchDay[matchDayIndex] = action.getGoals() > 0;
+                hasAssistInMatchDay[matchDayIndex] = action.getAssists() > 0;
+            }
+        }
+
+        // Calculate consecutive goal streaks
+        int maxGoalStreak = 0;
+        int currentGoalStreak = 0;
+
+        for (int i = 0; i < 38; i++) {
+            if (hasGoalInMatchDay[i]) {
                 currentGoalStreak++;
                 maxGoalStreak = Math.max(maxGoalStreak, currentGoalStreak);
             } else {
                 currentGoalStreak = 0;
             }
+        }
 
-            // Assist streak calculation
-            if (action.getAssists() > 0) {
+        // Calculate consecutive assist streaks
+        int maxAssistStreak = 0;
+        int currentAssistStreak = 0;
+
+        for (int i = 0; i < 38; i++) {
+            if (hasAssistInMatchDay[i]) {
                 currentAssistStreak++;
                 maxAssistStreak = Math.max(maxAssistStreak, currentAssistStreak);
             } else {
@@ -252,22 +308,48 @@ public class ActionServiceImpl implements ActionService {
             }
         }
 
+        // Calculate current streaks (from the end)
+        int currentGoalStreakFromEnd = 0;
+        int currentAssistStreakFromEnd = 0;
+
+        for (int i = 37; i >= 0; i--) {
+            if (hasGoalInMatchDay[i]) {
+                currentGoalStreakFromEnd++;
+            } else {
+                break;
+            }
+        }
+
+        for (int i = 37; i >= 0; i--) {
+            if (hasAssistInMatchDay[i]) {
+                currentAssistStreakFromEnd++;
+            } else {
+                break;
+            }
+        }
+
         return new StreakResultDTO(maxGoalStreak, maxAssistStreak,
-                currentGoalStreak, currentAssistStreak);
+                currentGoalStreakFromEnd, currentAssistStreakFromEnd);
     }
 
     @Override
     public List<StreakLeaderboardDTO> getLongestGoalStreaks(int limit) {
-        List<Object[]> results = actionRepository.getLongestGoalStreaks();
-        return results.stream()
-                .limit(limit)
+        // Get all players and calculate their streaks properly
+        List<Object[]> playerResults = actionRepository.getPlayerStatistics();
+
+        return playerResults.stream()
                 .map(result -> {
-                    StreakLeaderboardDTO dto = new StreakLeaderboardDTO(
-                            (Long) result[0],        // playerId
-                            (String) result[1],      // playerName
-                            (String) result[2],      // clubName
-                            ((Number) result[3]).intValue()      // streakLength
-                    );
+                    Long playerId = (Long) result[0];
+                    String playerName = (String) result[1];
+                    String clubName = (String) result[2];
+
+                    StreakResultDTO streaks = calculatePlayerStreaks(playerId);
+                    return new StreakLeaderboardDTO(playerId, playerName, clubName, streaks.getMaxGoalStreak());
+                })
+                .filter(dto -> dto.getStreakLength().intValue() > 0) // Only players with streaks
+                .sorted((a, b) -> Integer.compare(b.getStreakLength().intValue(), a.getStreakLength().intValue()))
+                .limit(limit)
+                .map(dto -> {
                     dto.setStreakType("GOALS");
                     return dto;
                 })
@@ -276,20 +358,80 @@ public class ActionServiceImpl implements ActionService {
 
     @Override
     public List<StreakLeaderboardDTO> getLongestAssistStreaks(int limit) {
-        List<Object[]> results = actionRepository.getLongestAssistStreaks();
-        return results.stream()
-                .limit(limit)
+        // Get all players and calculate their streaks properly
+        List<Object[]> playerResults = actionRepository.getPlayerStatistics();
+
+        return playerResults.stream()
                 .map(result -> {
-                    StreakLeaderboardDTO dto = new StreakLeaderboardDTO(
-                            (Long) result[0],              // playerId
-                            (String) result[1],            // playerName
-                            (String) result[2],            // clubName
-                            ((Number) result[3]).intValue() // streakLength
-                    );
+                    Long playerId = (Long) result[0];
+                    String playerName = (String) result[1];
+                    String clubName = (String) result[2];
+
+                    StreakResultDTO streaks = calculatePlayerStreaks(playerId);
+                    return new StreakLeaderboardDTO(playerId, playerName, clubName, streaks.getMaxAssistStreak());
+                })
+                .filter(dto -> dto.getStreakLength().intValue() > 0) // Only players with streaks
+                .sorted((a, b) -> Integer.compare(b.getStreakLength().intValue(), a.getStreakLength().intValue()))
+                .limit(limit)
+                .map(dto -> {
                     dto.setStreakType("ASSISTS");
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    // NEW METHOD: Combined goals and assists streaks
+    public List<StreakLeaderboardDTO> getLongestCombinedStreaks(int limit) {
+        List<Object[]> playerResults = actionRepository.getPlayerStatistics();
+
+        return playerResults.stream()
+                .map(result -> {
+                    Long playerId = (Long) result[0];
+                    String playerName = (String) result[1];
+                    String clubName = (String) result[2];
+
+                    // Calculate combined streak (goals OR assists in consecutive match days)
+                    int combinedStreak = calculateCombinedStreak(playerId);
+                    return new StreakLeaderboardDTO(playerId, playerName, clubName, combinedStreak);
+                })
+                .filter(dto -> dto.getStreakLength().intValue() > 0)
+                .sorted((a, b) -> Integer.compare(b.getStreakLength().intValue(), a.getStreakLength().intValue()))
+                .limit(limit)
+                .map(dto -> {
+                    dto.setStreakType("COMBINED");
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private int calculateCombinedStreak(Long playerId) {
+        List<Action> actions = actionRepository.findByPlayerIdOrderByMatchDay(playerId);
+
+        // Create array for match days 1-38
+        boolean[] hasActionInMatchDay = new boolean[38];
+
+        // Fill array - true if player had goals OR assists
+        for (Action action : actions) {
+            int matchDayIndex = action.getMatchDay().getNumber() - 1;
+            if (matchDayIndex >= 0 && matchDayIndex < 38) {
+                hasActionInMatchDay[matchDayIndex] = action.getGoals() > 0 || action.getAssists() > 0;
+            }
+        }
+
+        // Calculate longest consecutive streak
+        int maxStreak = 0;
+        int currentStreak = 0;
+
+        for (int i = 0; i < 38; i++) {
+            if (hasActionInMatchDay[i]) {
+                currentStreak++;
+                maxStreak = Math.max(maxStreak, currentStreak);
+            } else {
+                currentStreak = 0;
+            }
+        }
+
+        return maxStreak;
     }
 
     @Override

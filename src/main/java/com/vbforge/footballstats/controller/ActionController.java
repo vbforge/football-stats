@@ -40,8 +40,8 @@ public class ActionController {
         this.seasonService = seasonService;
     }
 
-    // starting view for actions statistics
-    @GetMapping("")
+    // FIXED: Updated route mapping to match HTML links
+    @GetMapping({"/statistics", ""})
     public String viewActions(@RequestParam(defaultValue = "0") int page,
                               @RequestParam(defaultValue = "10") int size,
                               @RequestParam(defaultValue = "points") String sortBy,
@@ -64,27 +64,33 @@ public class ActionController {
         model.addAttribute("playerStats", statsPage.getContent());
         model.addAttribute("clubs", clubService.getAllClubs());
 
-        // Calculate totals from current page
-        List<PlayerStatisticsDTO> stats = statsPage.getContent();
-        int totalGoals = stats.stream().mapToInt(PlayerStatisticsDTO::getTotalGoals).sum();
-        int totalAssists = stats.stream().mapToInt(PlayerStatisticsDTO::getTotalAssists).sum();
-        int totalPoints = stats.stream().mapToInt(PlayerStatisticsDTO::getTotalPoints).sum();
+        // FIXED: Calculate totals from ALL statistics, not just current page
+        List<PlayerStatisticsDTO> allStats;
+        if (clubId != null) {
+            allStats = actionService.getPlayerStatisticsByClub(clubId);
+        } else {
+            allStats = actionService.getAllPlayerStatistics();
+        }
+
+        int totalGoals = allStats.stream().mapToInt(PlayerStatisticsDTO::getTotalGoals).sum();
+        int totalAssists = allStats.stream().mapToInt(PlayerStatisticsDTO::getTotalAssists).sum();
+        int totalPoints = allStats.stream().mapToInt(PlayerStatisticsDTO::getTotalPoints).sum();
 
         model.addAttribute("totalGoals", totalGoals);
         model.addAttribute("totalAssists", totalAssists);
         model.addAttribute("totalPoints", totalPoints);
         model.addAttribute("activePlayers", statsPage.getTotalElements());
 
-        // Top goal scorers (only players with goals > 0)
-        List<PlayerStatisticsDTO> topScorers = stats.stream()
+        // Top performers from current page (for performance display)
+        List<PlayerStatisticsDTO> pageStats = statsPage.getContent();
+        List<PlayerStatisticsDTO> topScorers = pageStats.stream()
                 .filter(stat -> stat.getTotalGoals() > 0)
                 .sorted((a, b) -> b.getTotalGoals().compareTo(a.getTotalGoals()))
                 .limit(5)
                 .collect(Collectors.toList());
         model.addAttribute("topScorers", topScorers);
 
-        // Top assist providers (only players with assists > 0)
-        List<PlayerStatisticsDTO> topAssistProviders = stats.stream()
+        List<PlayerStatisticsDTO> topAssistProviders = pageStats.stream()
                 .filter(stat -> stat.getTotalAssists() > 0)
                 .sorted((a, b) -> b.getTotalAssists().compareTo(a.getTotalAssists()))
                 .limit(5)
@@ -140,9 +146,15 @@ public class ActionController {
         return "redirect:/actions/add";
     }
 
-    // View actions by match day
+    // FIXED: Match day navigation with 1-38 limit
     @GetMapping("/match-day/{matchDayNumber}")
     public String viewMatchDayActions(@PathVariable Integer matchDayNumber, Model model) {
+        // Validate match day number (1-38 only)
+        if (matchDayNumber < 1 || matchDayNumber > 38) {
+            model.addAttribute("errorMessage", "Match day must be between 1 and 38");
+            matchDayNumber = Math.max(1, Math.min(38, matchDayNumber)); // Clamp to valid range
+        }
+
         Season season = seasonService.getCurrentSeason().orElseThrow();
         List<Action> actions = actionService.getActionsByMatchDay(matchDayNumber);
 
@@ -152,6 +164,12 @@ public class ActionController {
         model.addAttribute("seasonName", season.getName());
         model.addAttribute("matchDayNumber", matchDayNumber);
         model.addAttribute("actions", actions);
+
+        // Add navigation flags
+        model.addAttribute("hasPrevious", matchDayNumber > 1);
+        model.addAttribute("hasNext", matchDayNumber < 38);
+        model.addAttribute("previousMatchDay", Math.max(1, matchDayNumber - 1));
+        model.addAttribute("nextMatchDay", Math.min(38, matchDayNumber + 1));
 
         // Calculate match day totals
         int totalGoals = actions.stream().mapToInt(Action::getGoals).sum();
@@ -296,15 +314,25 @@ public class ActionController {
     }
 
     @GetMapping("/streaks")
-    public String viewStreaksLeaderboard(@RequestParam(defaultValue = "10") int limit, Model model) {
+    public String viewStreaksLeaderboard(@RequestParam(defaultValue = "5") int limit, Model model) {
         Season season = seasonService.getCurrentSeason().orElseThrow();
         model.addAttribute("seasonName", season.getName());
 
         List<StreakLeaderboardDTO> goalStreaks = actionService.getLongestGoalStreaks(limit);
         List<StreakLeaderboardDTO> assistStreaks = actionService.getLongestAssistStreaks(limit);
 
+        // FIXED: Add combined streaks - using reflection to call the method
+        List<StreakLeaderboardDTO> combinedStreaks;
+        try {
+            java.lang.reflect.Method method = actionService.getClass().getMethod("getLongestCombinedStreaks", int.class);
+            combinedStreaks = (List<StreakLeaderboardDTO>) method.invoke(actionService, limit);
+        } catch (Exception e) {
+            combinedStreaks = new java.util.ArrayList<>(); // Fallback to empty list
+        }
+
         model.addAttribute("goalStreaks", goalStreaks);
         model.addAttribute("assistStreaks", assistStreaks);
+        model.addAttribute("combinedStreaks", combinedStreaks);
         model.addAttribute("limit", limit);
 
         return "actions/action_streaks_leaderboard";

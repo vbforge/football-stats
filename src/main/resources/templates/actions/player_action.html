@@ -19,7 +19,7 @@
             <span th:text="${seasonName}">Premier League</span>
         </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/actions/add"><i class="fas fa-plus me-1"></i>Player Action</a>
+<!--            <a class="nav-link" href="/actions/add"><i class="fas fa-plus me-1"></i>Player Action</a>-->
             <a class="nav-link" href="/actions/manage"><i class="fas fa-cogs me-1"></i>Manage Actions</a>
             <a class="nav-link" href="/actions/streaks"><i class="fas fa-fire me-1"></i>Streaks Leaderboard</a>
             <a class="nav-link" href="/actions"><i class="fas fa-futbol me-1"></i>Goals & Assists</a>
@@ -165,28 +165,43 @@
                                      style="width: 35px; height: 35px; font-size: 0.8rem;">
                                     <span th:text="${action.matchDay.number}">1</span>
                                 </div>
-                                <div>
+                                <!--<div>
                                     <strong>Match Day <span th:text="${action.matchDay.number}">1</span></strong>
                                     <small class="text-muted d-block">
                                         <a th:href="@{/actions/match-day/{day}(day=${action.matchDay.number})}"
                                            class="text-decoration-none">
-                                            <i class="fas fa-external-link-alt me-1"></i>View all actions
+                                            <i class="fas fa-external-link-alt me-1"></i>All actions this MD
                                         </a>
                                     </small>
+                                </div>-->
+
+                                <div>
+                                    <strong>
+                                        Match Day <span th:text="${action.matchDay.number}">1</span>
+                                    </strong>
+                                    <small class="text-muted">
+                                        (
+                                        <a th:href="@{/actions/match-day/{day}(day=${action.matchDay.number})}"
+                                           class="text-decoration-none">
+                                            <i class="fas fa-external-link-alt me-1"></i>All actions this MD
+                                        </a>
+                                        )
+                                    </small>
                                 </div>
+
                             </div>
                         </td>
                         <td class="text-center">
                             <span th:if="${action.goals > 0}" class="badge bg-success fs-6" th:text="${action.goals}"></span>
                             <span th:if="${action.goals == 0}" class="text-muted">-</span>
-                            <small class="text-muted d-block" th:if="${action.goals > 0}"
-                                   th:text="'(' + (${action.goals} * 3) + ' pts)'"></small>
+<!--                            <small class="text-muted d-block" th:if="${action.goals > 0}"-->
+<!--                                   th:text="'(' + (${action.goals} * 3) + ' pts)'"></small>-->
                         </td>
                         <td class="text-center">
                             <span th:if="${action.assists > 0}" class="badge bg-info fs-6" th:text="${action.assists}"></span>
                             <span th:if="${action.assists == 0}" class="text-muted">-</span>
-                            <small class="text-muted d-block" th:if="${action.assists > 0}"
-                                   th:text="'(' + ${action.assists} + ' pts)'"></small>
+<!--                            <small class="text-muted d-block" th:if="${action.assists > 0}"-->
+<!--                                   th:text="'(' + ${action.assists} + ' pts)'"></small>-->
                         </td>
                         <td class="text-center">
                                 <span th:if="${action.totalPoints > 0}"

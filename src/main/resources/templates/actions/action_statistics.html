@@ -195,7 +195,7 @@
                     <tr>
                         <th>Pos</th>
                         <th>
-                            <a th:href="@{/players/statistics(page=${currentPage}, size=${pageSize}, sortBy='name', sortDir=${sortBy == 'name' ? reverseSortDir : 'asc'}, clubId=${selectedClubId})}"
+                            <a th:href="@{/actions/statistics(page=${currentPage}, size=${pageSize}, sortBy='name', sortDir=${sortBy == 'name' ? reverseSortDir : 'asc'}, clubId=${selectedClubId})}"
                                class="text-white text-decoration-none">
                                 Player
                                 <i th:if="${sortBy == 'name'}" class="fas"
@@ -203,7 +203,7 @@
                             </a>
                         </th>
                         <th>
-                            <a th:href="@{/players/statistics(page=${currentPage}, size=${pageSize}, sortBy='club', sortDir=${sortBy == 'club' ? reverseSortDir : 'asc'}, clubId=${selectedClubId})}"
+                            <a th:href="@{/actions/statistics(page=${currentPage}, size=${pageSize}, sortBy='club', sortDir=${sortBy == 'club' ? reverseSortDir : 'asc'}, clubId=${selectedClubId})}"
                                class="text-white text-decoration-none">
                                 Club
                                 <i th:if="${sortBy == 'club'}" class="fas"
@@ -211,7 +211,7 @@
                             </a>
                         </th>
                         <th class="text-center">
-                            <a th:href="@{/players/statistics(page=${currentPage}, size=${pageSize}, sortBy='goals', sortDir=${sortBy == 'goals' ? reverseSortDir : 'desc'}, clubId=${selectedClubId})}"
+                            <a th:href="@{/actions/statistics(page=${currentPage}, size=${pageSize}, sortBy='goals', sortDir=${sortBy == 'goals' ? reverseSortDir : 'desc'}, clubId=${selectedClubId})}"
                                class="text-white text-decoration-none">
                                 Goals
                                 <i th:if="${sortBy == 'goals'}" class="fas"
@@ -219,7 +219,7 @@
                             </a>
                         </th>
                         <th class="text-center">
-                            <a th:href="@{/players/statistics(page=${currentPage}, size=${pageSize}, sortBy='assists', sortDir=${sortBy == 'assists' ? reverseSortDir : 'desc'}, clubId=${selectedClubId})}"
+                            <a th:href="@{/actions/statistics(page=${currentPage}, size=${pageSize}, sortBy='assists', sortDir=${sortBy == 'assists' ? reverseSortDir : 'desc'}, clubId=${selectedClubId})}"
                                class="text-white text-decoration-none">
                                 Assists
                                 <i th:if="${sortBy == 'assists'}" class="fas"
@@ -227,15 +227,29 @@
                             </a>
                         </th>
                         <th class="text-center">
-                            <a th:href="@{/players/statistics(page=${currentPage}, size=${pageSize}, sortBy='points', sortDir=${sortBy == 'points' ? reverseSortDir : 'desc'}, clubId=${selectedClubId})}"
+                            <a th:href="@{/actions/statistics(page=${currentPage}, size=${pageSize}, sortBy='points', sortDir=${sortBy == 'points' ? reverseSortDir : 'desc'}, clubId=${selectedClubId})}"
                                class="text-white text-decoration-none">
                                 Points
                                 <i th:if="${sortBy == 'points'}" class="fas"
                                    th:classappend="${sortDir == 'asc' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
                             </a>
                         </th>
-                        <th class="text-center">Goal Streak</th>
-                        <th class="text-center">Assist Streak</th>
+                        <th class="text-center">
+                            <a th:href="@{/actions/statistics(page=${currentPage}, size=${pageSize}, sortBy='goalStreak', sortDir=${sortBy == 'goalStreak' ? reverseSortDir : 'desc'}, clubId=${selectedClubId})}"
+                               class="text-white text-decoration-none">
+                                Goal Streak
+                                <i th:if="${sortBy == 'goalStreak'}" class="fas"
+                                   th:classappend="${sortDir == 'asc' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
+                            </a>
+                        </th>
+                        <th class="text-center">
+                            <a th:href="@{/actions/statistics(page=${currentPage}, size=${pageSize}, sortBy='assistStreak', sortDir=${sortBy == 'assistStreak' ? reverseSortDir : 'desc'}, clubId=${selectedClubId})}"
+                               class="text-white text-decoration-none">
+                                Assist Streak
+                                <i th:if="${sortBy == 'assistStreak'}" class="fas"
+                                   th:classappend="${sortDir == 'asc' ? 'fa-sort-up' : 'fa-sort-down'}"></i>
+                            </a>
+                        </th>
                         <th class="text-center">Actions</th>
                     </tr>
                     </thead>
@@ -297,7 +311,7 @@
             <!-- Previous Page -->
             <li class="page-item" th:classappend="${!statsPage.hasPrevious()} ? 'disabled'">
                 <a class="page-link"
-                   th:href="${statsPage.hasPrevious()} ? @{/players/statistics(page=${currentPage - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})} : '#'">
+                   th:href="${statsPage.hasPrevious()} ? @{/actions/statistics(page=${currentPage - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})} : '#'">
                     <i class="fas fa-chevron-left"></i>
                 </a>
             </li>
@@ -307,14 +321,14 @@
                 th:each="pageNum : ${#numbers.sequence(0, statsPage.totalPages - 1)}"
                 th:classappend="${pageNum == currentPage} ? 'active'">
                 <a class="page-link"
-                   th:href="@{/players/statistics(page=${pageNum}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})}"
+                   th:href="@{/actions/statistics(page=${pageNum}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})}"
                    th:text="${pageNum + 1}"></a>
             </li>
 
             <!-- Next Page -->
             <li class="page-item" th:classappend="${!statsPage.hasNext()} ? 'disabled'">
                 <a class="page-link"
-                   th:href="${statsPage.hasNext()} ? @{/players/statistics(page=${currentPage + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})} : '#'">
+                   th:href="${statsPage.hasNext()} ? @{/actions/statistics(page=${currentPage + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})} : '#'">
                     <i class="fas fa-chevron-right"></i>
                 </a>
             </li>

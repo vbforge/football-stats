@@ -1,11 +1,9 @@
 package com.vbforge.footballstats.controller;
 
-import com.vbforge.footballstats.dto.action.PlayerStatsDTO;
 import com.vbforge.footballstats.dto.club.ClubDetailDTO;
 import com.vbforge.footballstats.entity.City;
 import com.vbforge.footballstats.entity.Club;
 
-import com.vbforge.footballstats.entity.Player;
 import com.vbforge.footballstats.entity.Season;
 import com.vbforge.footballstats.service.CityService;
 import com.vbforge.footballstats.service.ClubService;
@@ -16,8 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/clubs")
@@ -32,8 +28,6 @@ public class ClubController {
         this.cityService = cityService;
         this.seasonService = seasonService;
     }
-
-    //todo: need to think about how to create a new club correct with requirements of app based on the season start/finish
 
     // Club details
     @GetMapping("/{id}")
@@ -68,7 +62,7 @@ public class ClubController {
         }
     }
 
-    // Update club
+    /*// Update club
     @PostMapping("/{id}/update")
     public String updateClub(@PathVariable Long id,
                              @ModelAttribute Club club,
@@ -81,6 +75,42 @@ public class ClubController {
 
         try {
             club.setId(id);
+            clubService.updateClub(club);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Club " + club.getName() + " updated successfully");
+            return "redirect:/clubs/" + id;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Error updating club: " + e.getMessage());
+            return "redirect:/clubs/" + id + "/edit";
+        }
+    }*/
+
+    @PostMapping("/{id}/update")
+    public String updateClub(@PathVariable Long id,
+                             @ModelAttribute Club club,
+                             @RequestParam(value = "cityName", required = false) String cityName,
+                             BindingResult result,
+                             RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please fix the errors in the form");
+            return "redirect:/clubs/" + id + "/edit";
+        }
+
+        try {
+            club.setId(id);
+
+            // Handle city if provided
+            if (cityName != null && !cityName.trim().isEmpty()) {
+                City city = cityService.getCityByName(cityName.trim())
+                        .orElseGet(() -> {
+                            City newCity = new City();
+                            newCity.setName(cityName.trim());
+                            return cityService.saveCity(newCity); // You'll need this method in CityService
+                        });
+                club.setCity(city);
+            }
+
             clubService.updateClub(club);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Club " + club.getName() + " updated successfully");

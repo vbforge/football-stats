@@ -49,6 +49,9 @@
                                     <label for="nickname" class="form-label">Nickname</label>
                                     <input type="text" class="form-control" id="nickname" th:field="*{nickname}">
                                 </div>
+                            </div>
+
+                            <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label for="coach" class="form-label">Coach</label>
                                     <input type="text" class="form-control" id="coach" th:field="*{coach}">
@@ -57,8 +60,11 @@
 
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label for="city" class="form-label">City</label>
-                                    <input type="text" class="form-control" id="city" th:field="*{city}">
+<!--                                    <label for="city" class="form-label">City</label>-->
+<!--                                    <input type="text" class="form-control" id="city" th:field="*{city.name}">-->
+                                    <label for="cityName" class="form-label">City</label>
+                                    <input type="text" class="form-control" id="cityName" name="cityName"
+                                           th:value="${club.city != null ? club.city.name : ''}" placeholder="Enter city name">
                                 </div>
                                 <div class="col-md-6">
                                     <label for="foundedYear" class="form-label">Founded Year</label>
@@ -109,7 +115,7 @@
 
                             <div class="mb-3">
                                 <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control" id="description" th:field="*{description}" rows="4" 
+                                <textarea class="form-control" id="description" th:field="*{description}" rows="8"
                                          placeholder="Brief description of the club, its history, achievements, etc."></textarea>
                             </div>
 

@@ -295,15 +295,20 @@
         </div>
     </div>
 
-    <!-- Description -->
     <div th:if="${club.description}" class="row mb-4">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>About the Club</h5>
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>About the Club
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <p th:text="${club.description}" class="mb-0">Club description</p>
+                    <div th:each="line : ${#strings.arraySplit(club.description, '\\.')}">
+                        <p class="mb-1">
+                            <strong>&nbsp;&nbsp;• <span th:text="${line.trim()}"></span></strong>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
