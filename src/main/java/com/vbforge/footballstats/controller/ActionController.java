@@ -40,9 +40,10 @@ public class ActionController {
         this.seasonService = seasonService;
     }
 
+    // starting view for actions statistics
     @GetMapping("")
     public String viewActions(@RequestParam(defaultValue = "0") int page,
-                              @RequestParam(defaultValue = "20") int size,
+                              @RequestParam(defaultValue = "10") int size,
                               @RequestParam(defaultValue = "points") String sortBy,
                               @RequestParam(defaultValue = "desc") String sortDir,
                               @RequestParam(required = false) Long clubId,
@@ -196,7 +197,7 @@ public class ActionController {
         }
     }
 
-    // Update existing action - Fixed method signature and implementation
+    // Update existing action
     @PostMapping("/update/{actionId}")
     public String updateAction(@PathVariable Long actionId,
                                @ModelAttribute ActionFormDTO actionForm,

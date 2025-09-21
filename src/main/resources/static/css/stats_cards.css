@@ -8,3 +8,14 @@
 .trophy-gold { color: #ffd700; }
 .trophy-silver { color: #c0c0c0; }
 .trophy-bronze { color: #cd7f32; }
+
+/* Smaller variant */
+.small-card {
+    font-size: 0.9rem;
+}
+.small-card .card-body {
+    padding: 0.5rem;
+}
+.small-card i {
+    font-size: 1.25rem; /* smaller than fa-2x */
+}

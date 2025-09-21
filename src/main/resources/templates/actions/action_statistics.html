@@ -31,19 +31,25 @@
 </nav>
 
 <div class="container mt-4">
+    <div class="col-md-8">
+        <h2><i class="fas fa-futbol text-warning me-2"></i>Goals & Assists</h2>
+        <p class="text-muted">Players with at least one action for goals and assists</p>
+    </div>
 
     <!-- Controls Row -->
     <div class="row mb-4 align-items-center">
         <!-- Filter Dropdown -->
         <div class="col-md-4">
             <div class="dropdown">
-                <button class="btn btn-outline-primary dropdown-toggle" type="button"
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button"
                         data-bs-toggle="dropdown">
                     <i class="fas fa-filter me-2"></i>Filter by Club
                 </button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="/actions/statistics">All Clubs</a></li>
-                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
                     <li th:each="club : ${clubs}">
                         <a class="dropdown-item"
                            th:href="@{/actions/statistics/club/{id}(id=${club.id})}"
@@ -57,11 +63,11 @@
         <!-- Legend -->
         <div class="col-md-4 text-center">
             <strong>
-            <small>
-                <i class="fas fa-futbol text-success me-1"></i> Goals = 3 pts &nbsp;|&nbsp;
-                <i class="fas fa-hands-helping text-info me-1"></i> Assists = 1 pt &nbsp;|&nbsp;
-                <i class="fas fa-calculator text-warning me-1"></i> Total = (G × 3) + A
-            </small>
+                <small>
+                    <i class="fas fa-futbol text-success me-1"></i> Goals = 3 pts &nbsp;|&nbsp;
+                    <i class="fas fa-hands-helping text-info me-1"></i> Assists = 1 pt &nbsp;|&nbsp;
+                    <i class="fas fa-calculator text-warning me-1"></i> Total = (G × 3) + A
+                </small>
             </strong>
         </div>
 
@@ -84,39 +90,39 @@
     </div>
 
     <!-- Summary Cards -->
-    <div class="row g-3">
-        <div class="col-md-3">
-            <div class="card stats-card bg-success text-white">
-                <div class="card-body text-center">
-                    <i class="fas fa-futbol fa-2x mb-2"></i>
-                    <h4 th:text="${totalGoals}">0</h4>
+    <div class="row g-2">
+        <div class="col-6 col-md-3">
+            <div class="card stats-card bg-success text-white small-card">
+                <div class="card-body text-center py-2">
+                    <i class="fas fa-futbol fa-lg mb-1"></i>
+                    <h6 class="mb-0" th:text="${totalGoals}">0</h6>
                     <small>Total Goals</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stats-card bg-info text-white">
-                <div class="card-body text-center">
-                    <i class="fas fa-hands-helping fa-2x mb-2"></i>
-                    <h4 th:text="${totalAssists}">0</h4>
+        <div class="col-6 col-md-3">
+            <div class="card stats-card bg-info text-white small-card">
+                <div class="card-body text-center py-2">
+                    <i class="fas fa-hands-helping fa-lg mb-1"></i>
+                    <h6 class="mb-0" th:text="${totalAssists}">0</h6>
                     <small>Total Assists</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stats-card bg-primary text-white">
-                <div class="card-body text-center">
-                    <i class="fas fa-star fa-2x mb-2"></i>
-                    <h4 th:text="${totalPoints}">0</h4>
+        <div class="col-6 col-md-3">
+            <div class="card stats-card bg-primary text-white small-card">
+                <div class="card-body text-center py-2">
+                    <i class="fas fa-star fa-lg mb-1"></i>
+                    <h6 class="mb-0" th:text="${totalPoints}">0</h6>
                     <small>Total Points</small>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stats-card bg-warning text-dark">
-                <div class="card-body text-center">
-                    <i class="fas fa-users fa-2x mb-2"></i>
-                    <h4 th:text="${activePlayers}">0</h4>
+        <div class="col-6 col-md-3">
+            <div class="card stats-card bg-warning text-dark small-card">
+                <div class="card-body text-center py-2">
+                    <i class="fas fa-users fa-lg mb-1"></i>
+                    <h6 class="mb-0" th:text="${activePlayers}">0</h6>
                     <small>Active Players</small>
                 </div>
             </div>
@@ -142,7 +148,8 @@
                             <small class="text-muted" th:text="' (' + ${stat.clubName} + ')'"></small>
                         </div>
                         <span class="badge bg-success"
-                              th:text="${stat.totalGoals} + ' goals (' + (${stat.totalGoals} * 3) + ' pts)'"></span>
+                              th:text="${stat.totalGoals} + ' goals'">
+                        </span>
                     </div>
                 </div>
             </div>
@@ -174,7 +181,7 @@
     <div class="card mt-4">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
-                <i class="fas fa-trophy me-2"></i>
+                <i class="fas fa-users me-2"></i>
                 Players Statistics
                 <small th:if="${selectedClubId}" class="text-white-50">- Club Filter Active</small>
                 <small class="text-white-50 ms-2" th:if="${statsPage}"
@@ -235,20 +242,12 @@
                     <tbody>
                     <tr th:each="stat, iterStat : ${playerStats}"
                         th:class="${iterStat.index < 3} ? 'table-warning' : ''">
-                        <!--                        <td class="fw-bold">-->
-                        <!--                            <span th:switch="${iterStat.index + (${currentPage} * ${pageSize})}">-->
-                        <!--                                <i th:case="0" class="fas fa-trophy trophy-gold me-1"></i>-->
-                        <!--                                <i th:case="1" class="fas fa-medal trophy-silver me-1"></i>-->
-                        <!--                                <i th:case="2" class="fas fa-medal trophy-bronze me-1"></i>-->
-                        <!--                            </span>-->
-                        <!--                            <span th:text="${iterStat.index + 1 + (${currentPage} * ${pageSize})}"></span>-->
-                        <!--                        </td>-->
                         <td class="fw-bold">
-    <span th:switch="${iterStat.index + (currentPage * pageSize)}">
-        <i th:case="0" class="fas fa-trophy trophy-gold me-1"></i>
-        <i th:case="1" class="fas fa-medal trophy-silver me-1"></i>
-        <i th:case="2" class="fas fa-medal trophy-bronze me-1"></i>
-    </span>
+                            <span th:switch="${iterStat.index + (currentPage * pageSize)}">
+                                <i th:case="0" class="fas fa-trophy trophy-gold me-1"></i>
+                                <i th:case="1" class="fas fa-medal trophy-silver me-1"></i>
+                                <i th:case="2" class="fas fa-medal trophy-bronze me-1"></i>
+                            </span>
                             <span th:text="${iterStat.index + 1 + (currentPage * pageSize)}"></span>
                         </td>
                         <td class="fw-semibold">
@@ -260,25 +259,18 @@
                         </td>
                         <td class="text-center">
                             <span class="badge bg-success" th:text="${stat.totalGoals}"></span>
-                            <small class="text-muted d-block"
-                                   th:text="'(' + (${stat.totalGoals} * 3) + ' pts)'"></small>
                         </td>
                         <td class="text-center">
                             <span class="badge bg-info" th:text="${stat.totalAssists}"></span>
-                            <small class="text-muted d-block" th:text="'(' + ${stat.totalAssists} + ' pts)'"></small>
                         </td>
                         <td class="text-center">
                             <span class="badge bg-primary fs-6" th:text="${stat.totalPoints}"></span>
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-warning text-dark"
-                                  th:text="${stat.maxGoalStreak}"
-                                  th:title="'Longest scoring streak: ' + ${stat.maxGoalStreak} + ' match days'"></span>
+                            <span class="badge bg-warning text-dark" th:text="${stat.maxGoalStreak}"></span>
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-warning text-dark"
-                                  th:text="${stat.maxAssistStreak}"
-                                  th:title="'Longest assist streak: ' + ${stat.maxAssistStreak} + ' match days'"></span>
+                            <span class="badge bg-warning text-dark" th:text="${stat.maxAssistStreak}"></span>
                         </td>
                         <td class="text-center">
                             <div class="btn-group btn-group-sm" role="group">
@@ -298,45 +290,6 @@
             </div>
         </div>
     </div>
-
-<!--    &lt;!&ndash; Pagination &ndash;&gt;-->
-<!--    <nav th:if="${statsPage and statsPage.totalPages > 1}" class="mt-4">-->
-<!--        <ul class="pagination justify-content-center">-->
-<!--            &lt;!&ndash; Previous Page &ndash;&gt;-->
-<!--            <li class="page-item" th:classappend="${!statsPage.hasPrevious()} ? 'disabled'">-->
-<!--                <a class="page-link"-->
-<!--                   th:href="${statsPage.hasPrevious()} ? @{/players/statistics(page=${currentPage - 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})} : '#'">-->
-<!--                    <i class="fas fa-chevron-left"></i>-->
-<!--                </a>-->
-<!--            </li>-->
-
-<!--            &lt;!&ndash; Page Numbers &ndash;&gt;-->
-<!--            <li class="page-item"-->
-<!--                th:each="pageNum : ${#numbers.sequence(0, statsPage.totalPages - 1)}"-->
-<!--                th:classappend="${pageNum == currentPage} ? 'active'">-->
-<!--                <a class="page-link"-->
-<!--                   th:href="@{/players/statistics(page=${pageNum}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})}"-->
-<!--                   th:text="${pageNum + 1}"></a>-->
-<!--            </li>-->
-
-<!--            &lt;!&ndash; Next Page &ndash;&gt;-->
-<!--            <li class="page-item" th:classappend="${!statsPage.hasNext()} ? 'disabled'">-->
-<!--                <a class="page-link"-->
-<!--                   th:href="${statsPage.hasNext()} ? @{/players/statistics(page=${currentPage + 1}, size=${pageSize}, sortBy=${sortBy}, sortDir=${sortDir}, clubId=${selectedClubId})} : '#'">-->
-<!--                    <i class="fas fa-chevron-right"></i>-->
-<!--                </a>-->
-<!--            </li>-->
-<!--        </ul>-->
-
-<!--        &lt;!&ndash; Page Info &ndash;&gt;-->
-<!--        <div class="text-center text-muted mt-2">-->
-<!--            <small>-->
-<!--                Showing <span th:text="${(currentPage * pageSize) + 1}">1</span> to-->
-<!--                <span th:text="${(currentPage + 1) * pageSize > statsPage.totalElements ? statsPage.totalElements : (currentPage + 1) * pageSize}">20</span>-->
-<!--                of <span th:text="${statsPage.totalElements}">100</span> players-->
-<!--            </small>-->
-<!--        </div>-->
-<!--    </nav>-->
 
     <!-- Pagination -->
     <nav th:if="${statsPage != null and statsPage.totalPages > 1}" class="mt-4">
