@@ -122,7 +122,7 @@ public class PlayerController {
 
             model.addAttribute("player", player);
             model.addAttribute("playerStats", playerStats);
-            return "/players/player_detail";
+            return "players/player_detail";
         } catch (EntityNotFoundException e) {
             model.addAttribute("errorMessage", "Player not found");
             return "redirect:/league";
