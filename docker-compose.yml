@@ -6,10 +6,10 @@ services:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: football_stats
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       # Persistent data volume
-      - mysql_data:/var/lib/mysql
+      - mysql_data_football:/var/lib/mysql
       # Backup file mounted into init folder
       - ./fs-app.sql:/docker-entrypoint-initdb.d/backup.sql:ro
     networks:
@@ -30,7 +30,7 @@ services:
       - football-stats-network
 
 volumes:
-  mysql_data:
+  mysql_data_football:
 
 networks:
   football-stats-network:
