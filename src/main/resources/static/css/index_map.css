@@ -1,0 +1,41 @@
+/*City-points*/
+.city-point {
+    fill: red;
+    stroke: white;
+    stroke-width: 2;
+    cursor: pointer;
+    transition: transform 0.2s, fill 0.2s;
+    transform-box: fill-box;
+    transform-origin: center;
+}
+.city-point:hover {
+    transform: scale(1.3);
+    fill: orange;
+}
+
+/*Map container & card*/
+.map-container {
+    display: flex;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.map-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    flex: 1;
+    max-width: 500px;
+}
+.map-svg {
+    width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+h2 {
+    color: #2c5aa0;
+    margin-top: 0;
+    text-align: center;
+}

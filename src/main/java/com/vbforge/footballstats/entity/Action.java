@@ -1,0 +1,45 @@
+package com.vbforge.footballstats.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "actions")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Action {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "player_id", nullable = false)
+    private Player player;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "match_day_id", nullable = false)
+    private MatchDay matchDay;
+
+    @Column(nullable = false)
+    private Integer goals = 0;
+
+    @Column(nullable = false)
+    private Integer assists = 0;
+
+    // Updated point calculation: Goals = 3 points, Assists = 1 point
+    public Integer getTotalPoints(){
+        return (goals * 3) + assists;
+    }
+
+    // Helper method to get goals weighted score
+    public Integer getGoalsPoints() {
+        return goals * 3;
+    }
+
+    // Helper method to get assists weighted score
+    public Integer getAssistsPoints() {
+        return assists;
+    }
+}

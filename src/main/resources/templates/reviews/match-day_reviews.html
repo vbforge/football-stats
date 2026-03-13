@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Premier League ' + ${seasonName}">Match Days Reviews</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/index_navbar.css">
+    <style>
+        .match-result, .match-schedule {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            background-color: #f8f9fa;
+        }
+
+        .score-container, .vs-container {
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* Video Section Styles */
+        .video-section {
+            background: linear-gradient(135deg, #667eea 0%, #452169 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .video-toggle-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .video-toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+        }
+
+        .video-container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .video-container.show {
+            display: block;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .custom-video {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .video-title {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .video-controls {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .video-control-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .video-control-btn:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-dark shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center fw-bold text-primary" href="/">
+            <img src="/images/logos/pl-logo-dark.svg" alt="Football Stats Logo" class="me-2">
+            <span th:text="${seasonName}">Premier League</span>
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/review"><i class="fas fa-video me-1"></i>MatchDays Review</a>
+            <a class="nav-link" href="/actions/manage"><i class="fas fa-cogs me-1"></i>Manage Actions</a>
+            <a class="nav-link" href="/actions/streaks"><i class="fas fa-fire me-1"></i>Streaks Leaderboard</a>
+            <a class="nav-link" href="/actions"><i class="fas fa-futbol me-1"></i>Goals & Assists</a>
+            <a class="nav-link" href="/games"><i class="fas fa-calendar-alt me-1"></i>Games</a>
+            <a class="nav-link" href="/league"><i class="fas fa-trophy me-1"></i>League</a>
+            <a class="nav-link" href="/cities"><i class="fas fa-map-marked-alt me-1"></i>Premier League Map</a>
+        </div>
+    </div>
+</nav>
+
+<!--&lt;!&ndash; Video Section &ndash;&gt;
+<div class="video-section">
+    <div class="text-center">
+        <h2 class="video-title">
+            <i class="fas fa-play-circle me-2"></i>
+            MD-1 Review
+        </h2>
+        <button class="btn video-toggle-btn" onclick="toggleVideo()">
+            <i class="fas fa-video me-2"></i>
+            <span id="videoButtonText">Watch Video</span>
+        </button>
+    </div>
+
+    <div id="videoContainer" class="video-container">
+        <div class="text-center">
+            <video id="plVideo" class="custom-video" controls preload="metadata">
+                <source src="/videos/MD-1.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+
+            <div class="video-controls">
+                <button class="btn video-control-btn" onclick="playPauseVideo()">
+                    <i class="fas fa-play" id="playPauseIcon"></i>
+                    <span id="playPauseText">Play</span>
+                </button>
+                <button class="btn video-control-btn" onclick="stopVideo()">
+                    <i class="fas fa-stop me-1"></i>Stop
+                </button>
+                <button class="btn video-control-btn" onclick="toggleMute()">
+                    <i class="fas fa-volume-up" id="muteIcon"></i>
+                    <span id="muteText">Mute</span>
+                </button>
+                <button class="btn video-control-btn" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand me-1"></i>Fullscreen
+                </button>
+            </div>
+        </div>
+    </div>
+</div>-->
+
+<div class="container py-4">
+    <h2 class="mb-4">MatchDay Reviews – <span th:text="${seasonName}"></span></h2>
+
+    <div class="row g-3">
+        <div class="col-md-2 col-sm-4 col-6 text-center"
+             th:each="md : ${matchDays}">
+            <a th:href="@{/review/{id}(id=${md})}" class="btn btn-outline-primary w-100">
+                MD-<span th:text="${md}"></span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Video Controls -->
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let video = null;
+    let isVideoVisible = false;
+
+    function toggleVideo() {
+        const videoContainer = document.getElementById('videoContainer');
+        const buttonText = document.getElementById('videoButtonText');
+
+        if (!isVideoVisible) {
+            videoContainer.classList.add('show');
+            buttonText.innerHTML = '<i class="fas fa-eye-slash me-2"></i>Hide Video';
+            isVideoVisible = true;
+
+            // Initialize video reference when first shown
+            if (!video) {
+                video = document.getElementById('plVideo');
+                setupVideoEventListeners();
+            }
+        } else {
+            videoContainer.classList.remove('show');
+            buttonText.innerHTML = '<i class="fas fa-video me-2"></i>Watch Video';
+            isVideoVisible = false;
+
+            // Pause video when hiding
+            if (video && !video.paused) {
+                video.pause();
+                updatePlayPauseButton();
+            }
+        }
+    }
+
+    function setupVideoEventListeners() {
+        if (!video) return;
+
+        video.addEventListener('play', updatePlayPauseButton);
+        video.addEventListener('pause', updatePlayPauseButton);
+        video.addEventListener('ended', function() {
+            updatePlayPauseButton();
+            // Optionally auto-hide video when ended
+            // toggleVideo();
+        });
+
+        video.addEventListener('volumechange', updateMuteButton);
+
+        // Update button when video loads
+        video.addEventListener('loadeddata', function() {
+            updatePlayPauseButton();
+            updateMuteButton();
+        });
+    }
+
+    function playPauseVideo() {
+        if (!video) return;
+
+        if (video.paused) {
+            video.play();
+        } else {
+            video.pause();
+        }
+    }
+
+    function stopVideo() {
+        if (!video) return;
+
+        video.pause();
+        video.currentTime = 0;
+        updatePlayPauseButton();
+    }
+
+    function toggleMute() {
+        if (!video) return;
+
+        video.muted = !video.muted;
+        updateMuteButton();
+    }
+
+    function toggleFullscreen() {
+        if (!video) return;
+
+        if (video.requestFullscreen) {
+            video.requestFullscreen();
+        } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+        } else if (video.mozRequestFullScreen) {
+            video.mozRequestFullScreen();
+        } else if (video.msRequestFullscreen) {
+            video.msRequestFullscreen();
+        }
+    }
+
+    function updatePlayPauseButton() {
+        const playPauseIcon = document.getElementById('playPauseIcon');
+        const playPauseText = document.getElementById('playPauseText');
+
+        if (!video || !playPauseIcon || !playPauseText) return;
+
+        if (video.paused) {
+            playPauseIcon.className = 'fas fa-play';
+            playPauseText.textContent = 'Play';
+        } else {
+            playPauseIcon.className = 'fas fa-pause';
+            playPauseText.textContent = 'Pause';
+        }
+    }
+
+    function updateMuteButton() {
+        const muteIcon = document.getElementById('muteIcon');
+        const muteText = document.getElementById('muteText');
+
+        if (!video || !muteIcon || !muteText) return;
+
+        if (video.muted) {
+            muteIcon.className = 'fas fa-volume-mute';
+            muteText.textContent = 'Unmute';
+        } else {
+            muteIcon.className = 'fas fa-volume-up';
+            muteText.textContent = 'Mute';
+        }
+    }
+
+    // Optional: Keyboard shortcuts for video control
+    document.addEventListener('keydown', function(event) {
+        if (!isVideoVisible || !video) return;
+
+        switch(event.code) {
+            case 'Space':
+                event.preventDefault();
+                playPauseVideo();
+                break;
+            case 'KeyM':
+                event.preventDefault();
+                toggleMute();
+                break;
+            case 'KeyF':
+                event.preventDefault();
+                toggleFullscreen();
+                break;
+            case 'KeyS':
+                event.preventDefault();
+                stopVideo();
+                break;
+        }
+    });
+</script>-->
+
+</body>
+</html>

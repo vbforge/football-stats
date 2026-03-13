@@ -1,0 +1,42 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: football-stats-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: football_stats
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data_football:/var/lib/mysql
+      - ./fs-app.sql:/docker-entrypoint-initdb.d/backup.sql:ro
+    networks:
+      - football-stats-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: vladbogdadocker/football-stats:latest
+    container_name: football-stats-app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/football_stats?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - football-stats-network
+    restart: on-failure
+
+volumes:
+  mysql_data_football:
+
+networks:
+  football-stats-network:
+    driver: bridge

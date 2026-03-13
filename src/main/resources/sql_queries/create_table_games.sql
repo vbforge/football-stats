@@ -1,0 +1,21 @@
+CREATE TABLE `games` (
+                         `id` bigint NOT NULL AUTO_INCREMENT,
+                         `home_club_id` bigint NOT NULL,
+                         `away_club_id` bigint NOT NULL,
+                         `match_day_id` bigint NOT NULL,
+                         `game_date` date NOT NULL,
+                         `home_goals` int DEFAULT NULL,
+                         `away_goals` int DEFAULT NULL,
+                         `status` enum('SCHEDULED','FINISHED') NOT NULL DEFAULT 'SCHEDULED',
+                         `stadium_name` varchar(255) DEFAULT NULL,
+                         PRIMARY KEY (`id`),
+                         KEY `FK_games_home_club` (`home_club_id`),
+                         KEY `FK_games_away_club` (`away_club_id`),
+                         KEY `FK_games_match_day` (`match_day_id`),
+                         KEY `IDX_games_date` (`game_date`),
+                         KEY `IDX_games_status` (`status`),
+                         CONSTRAINT `FK_games_away_club` FOREIGN KEY (`away_club_id`) REFERENCES `clubs` (`id`),
+                         CONSTRAINT `FK_games_home_club` FOREIGN KEY (`home_club_id`) REFERENCES `clubs` (`id`),
+                         CONSTRAINT `FK_games_match_day` FOREIGN KEY (`match_day_id`) REFERENCES `match_days` (`id`),
+                         CONSTRAINT `CHK_different_clubs` CHECK ((`home_club_id` <> `away_club_id`))
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci

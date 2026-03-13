@@ -1,0 +1,71 @@
+.league-table {
+    font-size: 0.95rem;
+}
+.position-badge {
+    min-width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+.champions-league { background-color: #28a745; color: white; }
+.europa-league { background-color: #17a2b8; color: white; }
+.top-half { background-color: #6c757d; color: white; }
+.bottom-half { background-color: #ffc107; color: black; }
+.relegation { background-color: #dc3545; color: white; }
+
+.club-logo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    border-radius: 2px;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.club-logo:hover {
+    transform: scale(1.1);
+}
+
+/* Fallback for missing logos */
+.club-logo.error {
+    display: none;
+}
+
+.club-logo-fallback {
+    display: none;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 50%;
+    color: #6c757d;
+    font-size: 12px;
+}
+
+.club-logo.error + .club-logo-fallback {
+    display: flex;
+}
+
+.club-name-container {
+    min-width: 0;
+    flex: 1;
+}
+
+.club-link {
+    transition: all 0.2s ease;
+}
+
+.club-link:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+    border-radius: 4px;
+    padding: 4px;
+    margin: -4px;
+}
+
+.club-link:hover .club-name {
+    color: #007bff !important;
+}
